@@ -195,7 +195,7 @@ export default function PropertyDetailsPage() {
   } else {
       unitIdentifier = 'N/E'; // No especificado
   }
-  const displayTitle = `Departamento Número ${unitIdentifier} ${property.condominioName} - ${derivedTypology}`;
+  const displayTitle = `Dpto N° ${unitIdentifier} ${property.condominioName} - ${derivedTypology}`;
 
 
   const mockData = { // These would ideally come from property object if schema extended
