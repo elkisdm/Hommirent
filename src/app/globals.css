@@ -12,66 +12,97 @@ h1, h2, h3, h4, h5, h6 {
 
 @layer base {
   :root {
-    --background: 208 67% 96%; /* #F0F8FA - Very light teal */
-    --foreground: 0 0% 20%;   /* #333333 - Dark gray */
+    --background: 30 50% 97%; /* Cream */
+    --foreground: 25 15% 20%;   /* Dark Warm Gray */
 
-    --card: 0 0% 100%;         /* #FFFFFF - White */
-    --card-foreground: 0 0% 20%; /* #333333 - Dark gray */
+    --card: 0 0% 100%;         /* White */
+    --card-foreground: 25 15% 20%; /* Dark Warm Gray */
 
-    --popover: 0 0% 100%;      /* #FFFFFF - White */
-    --popover-foreground: 0 0% 20%; /* #333333 - Dark gray */
+    --popover: 0 0% 100%;      /* White */
+    --popover-foreground: 25 15% 20%; /* Dark Warm Gray */
 
-    --primary: 190 85% 30%;    /* #0A7E8C - Teal */
-    --primary-foreground: 0 0% 100%; /* #FFFFFF - White */
+    --primary: 28 90% 53%;    /* #F57C00 - Coppery Orange */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 0 0% 96%;      /* #F4F4F4 - Light gray */
-    --secondary-foreground: 0 0% 20%; /* #333333 - Dark gray */
+    --secondary: 30 20% 92%;      /* Light warm gray */
+    --secondary-foreground: 25 15% 25%; /* Slightly darker warm gray */
 
-    --muted: 0 0% 96%;          /* #F4F4F4 - Light gray */
-    --muted-foreground: 0 0% 40%; /* Slightly adjusted for better visibility on light gray */
+    --muted: 30 20% 92%;          /* Light warm gray */
+    --muted-foreground: 25 15% 45%; /* Medium warm gray for muted text */
 
-    --accent: 49 100% 41%;     /* #D1AC00 - Mustard Yellow */
-    --accent-foreground: 0 0% 100%; /* White for better contrast on mustard */
+    --accent: 45 100% 50%;     /* #FFD600 - Bright Gold */
+    --accent-foreground: 25 20% 15%; /* Dark Brown/Black for contrast on gold */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 75% 55%; /* A noticeable red */
+    --destructive-foreground: 0 0% 100%; /* White */
 
-    --border: 0 0% 85%; /* Slightly darker border for better definition */
-    --input: 0 0% 85%; /* Slightly darker input border */
-    --ring: 190 85% 40%;        /* Teal for focus rings (slightly lighter for visibility) */
+    --border: 30 15% 85%; /* Light warm gray border */
+    --input: 30 15% 85%; /* Light warm gray input border */
+    --ring: 28 80% 60%;        /* Slightly lighter/brighter orange for focus rings */
+
+    --chart-1: 28 90% 53%; /* Primary Orange */
+    --chart-2: 45 100% 50%; /* Accent Gold */
+    --chart-3: 15 70% 50%; /* Reddish-Orange/Brown */
+    --chart-4: 35 80% 60%; /* Lighter Orange/Peach */
+    --chart-5: 50 60% 70%; /* Light Gold/Yellow */
 
     --radius: 0.5rem;
 
-    --chart-1: 190 85% 30%; /* Teal */
-    --chart-2: 49 100% 41%; /* Mustard Yellow */
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Sidebar Variables - Light Theme */
+    --sidebar-background: hsl(var(--card));
+    --sidebar-foreground: hsl(var(--card-foreground));
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: hsl(var(--border));
+    --sidebar-ring: hsl(var(--ring));
   }
 
   .dark {
-    /* Keeping dark theme variables as per original scaffold, 
-       but they can be customized later if a dark theme is explicitly desired.
-       For Hommie.cl, the light theme is primary. */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 190 80% 55%; /* Adjusted Teal for dark mode */
-    --primary-foreground: 0 0% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 49 90% 55%; /* Adjusted Mustard Yellow for dark mode */
-    --accent-foreground: 0 0% 10%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 25 15% 12%; /* Very Dark Warm Gray/Brown */
+    --foreground: 30 15% 95%;   /* Off-White */
+
+    --card: 25 15% 18%;         /* Darker warm gray for cards */
+    --card-foreground: 30 15% 95%; /* Off-White */
+
+    --popover: 25 15% 18%;      /* Darker warm gray */
+    --popover-foreground: 30 15% 95%; /* Off-White */
+
+    --primary: 30 95% 60%;    /* #FF8F00 - Vibrant Orange for dark mode */
+    --primary-foreground: 25 20% 10%; /* Near Black */
+
+    --secondary: 25 15% 22%;      /* Medium-dark warm gray */
+    --secondary-foreground: 30 15% 85%; /* Lighter warm gray */
+
+    --muted: 25 15% 22%;          /* Medium-dark warm gray */
+    --muted-foreground: 30 15% 65%; /* Medium-light warm gray */
+
+    --accent: 45 100% 65%;     /* #FFEB3B - Bright Yellow/Gold for dark mode */
+    --accent-foreground: 25 20% 10%; /* Near Black */
+
+    --destructive: 0 70% 60%; /* Slightly brighter red for dark mode */
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 190 80% 50%; /* Adjusted Teal ring for dark mode */
+
+    --border: 25 15% 25%; /* Dark warm gray border */
+    --input: 25 15% 25%; /* Dark warm gray input border */
+    --ring: 30 90% 65%;        /* Bright orange for focus rings in dark mode */
+
+    --chart-1: 30 95% 60%; /* Primary Orange (Dark) */
+    --chart-2: 45 100% 65%; /* Accent Gold (Dark) */
+    --chart-3: 15 75% 55%; /* Reddish-Orange/Brown (Dark) */
+    --chart-4: 35 85% 65%; /* Lighter Orange/Peach (Dark) */
+    --chart-5: 50 65% 75%; /* Light Gold/Yellow (Dark) */
+
+    /* Sidebar Variables - Dark Theme */
+    --sidebar-background: 25 10% 8%; /* Even darker, almost black with warmth */
+    --sidebar-foreground: 30 10% 75%; /* Muted light gray for sidebar text */
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: 25 10% 15%; /* Subtle border for very dark bg */
+    --sidebar-ring: hsl(var(--ring));
   }
 }
 
