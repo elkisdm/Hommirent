@@ -302,41 +302,18 @@ export default function PropertyDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left/Main Column (Gallery, Details) - Col span 2 on LG */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Header Section */}
-            <section>
+            
+            <section> {/* Section for Title, Favorite, and then Gallery */}
               <div className="flex justify-between items-start mb-2">
                 <h1 className="text-3xl font-bold tracking-tight">{displayTitle}</h1>
                 <Button variant="ghost" size="icon" onClick={toggleFavorite} title="Guardar Favorito">
                   <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
                 </Button>
               </div>
-              <div className="flex items-center text-muted-foreground mb-3">
-                <MapPin className="w-5 h-5 mr-2 text-primary" />
-                {property.address.street}{property.address.number ? `, ${property.address.number}` : ''}, {property.address.commune}
-              </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
-                <span className="flex items-center"><BedDouble className="w-4 h-4 mr-1.5 text-primary" /> {property.bedrooms} Dormitorios</span>
-                <span className="flex items-center"><Bath className="w-4 h-4 mr-1.5 text-primary" /> {property.bathrooms} Baños</span>
-                <span className="flex items-center"><Square className="w-4 h-4 mr-1.5 text-primary" /> {property.areaSqMeters} m² Totales</span>
-                {hasParking && <span className="flex items-center"><ParkingCircle className="w-4 h-4 mr-1.5 text-primary" /> Estacionamiento</span>}
-                {hasBodega && <span className="flex items-center"><Archive className="w-4 h-4 mr-1.5 text-primary" /> Bodega</span>}
-              </div>
-              {unitHighlights.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {unitHighlights.map(highlight => (
-                    <Badge key={highlight.label} variant="outline" className="border-sky-500 text-sky-700 bg-sky-100 dark:bg-sky-800/30 dark:text-sky-300 dark:border-sky-600 shadow-sm transition-all hover:shadow-md">
-                      <highlight.icon className="mr-1.5 h-4 w-4 text-sky-600 dark:text-sky-400" />
-                      {highlight.label}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </section>
 
-            {/* Multimedia Gallery Section */}
-            <section>
+              {/* Multimedia Gallery Section - MOVED HERE */}
               {property.imageUrls && property.imageUrls.length > 0 && (
-                <div className="relative group">
+                <div className="relative group mt-4"> {/* Added mt-4 for spacing from title */}
                   <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden shadow-md">
                     <Image
                       src={currentImageUrl}
@@ -375,6 +352,30 @@ export default function PropertyDetailsPage() {
                   <MapIcon className="mr-2 h-4 w-4" /> Ver Plano(s) (Próximamente)
                 </Button>
               </div>
+            </section>
+
+            <section> {/* Section for Address, Key Specs, Unit Highlights */}
+              <div className="flex items-center text-muted-foreground mb-3">
+                <MapPin className="w-5 h-5 mr-2 text-primary" />
+                {property.address.street}{property.address.number ? `, ${property.address.number}` : ''}, {property.address.commune}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+                <span className="flex items-center"><BedDouble className="w-4 h-4 mr-1.5 text-primary" /> {property.bedrooms} Dormitorios</span>
+                <span className="flex items-center"><Bath className="w-4 h-4 mr-1.5 text-primary" /> {property.bathrooms} Baños</span>
+                <span className="flex items-center"><Square className="w-4 h-4 mr-1.5 text-primary" /> {property.areaSqMeters} m² Totales</span>
+                {hasParking && <span className="flex items-center"><ParkingCircle className="w-4 h-4 mr-1.5 text-primary" /> Estacionamiento</span>}
+                {hasBodega && <span className="flex items-center"><Archive className="w-4 h-4 mr-1.5 text-primary" /> Bodega</span>}
+              </div>
+              {unitHighlights.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {unitHighlights.map(highlight => (
+                    <Badge key={highlight.label} variant="outline" className="border-sky-500 text-sky-700 bg-sky-100 dark:bg-sky-800/30 dark:text-sky-300 dark:border-sky-600 shadow-sm transition-all hover:shadow-md">
+                      <highlight.icon className="mr-1.5 h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      {highlight.label}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </section>
             
             {/* Buttons for other units/typologies */}
