@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { MapPin, BedDouble, Bath, Square, Tag, CheckCircle, XCircle, AlertTriangle, Building, UserCircle, MessageSquare } from 'lucide-react'; // Changed RulerSquare to Square
+import { MapPin, BedDouble, Bath, Square, Tag, CheckCircle, XCircle, AlertTriangle, Building, UserCircle, MessageSquare, Home } from 'lucide-react';
 import type { Property, Interest } from '@/types';
 import { db, auth } from '@/lib/firebase/config';
 import { doc, getDoc, serverTimestamp, addDoc, collection, Timestamp } from 'firebase/firestore';
@@ -18,11 +18,12 @@ import { useToast } from '@/hooks/use-toast';
 const mockProperty: Property = {
   propertyId: 'prop-1',
   ownerUid: 'owner-1',
-  title: 'Lujoso Penthouse con Vista Panorámica',
+  title: 'Unidad A-101 Penthouse',
+  condominioName: 'Condominio Vista Azul',
   description: 'Espectacular penthouse en el corazón de la ciudad, con acabados de lujo, amplias terrazas y vistas inigualables. Cuenta con sistema de domótica, jacuzzi privado y acceso directo desde el ascensor. Cercano a los mejores restaurantes, tiendas y parques. Una oportunidad única para vivir con estilo y comodidad.',
   address: {
     street: 'Av. Vitacura 2900',
-    number: 'Piso 20',
+    number: 'Piso 20', // This could be part of title or a separate 'unitNumber' field if needed
     commune: 'Las Condes',
     city: 'Santiago',
     region: 'Metropolitana',
@@ -189,8 +190,12 @@ export default function PropertyDetailsPage() {
         <CardContent className="p-6 space-y-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-start">
             <div>
+              <div className="flex items-center text-lg text-muted-foreground mb-1">
+                <Home className="w-5 h-5 mr-2 text-primary" />
+                {property.condominioName}
+              </div>
               <CardTitle className="text-3xl font-bold">{property.title}</CardTitle>
-              <div className="flex items-center text-lg text-muted-foreground mt-1">
+              <div className="flex items-center text-md text-muted-foreground mt-1">
                 <MapPin className="w-5 h-5 mr-2 text-primary" />
                 {property.address.street}{property.address.number ? `, ${property.address.number}` : ''}, {property.address.commune}, {property.address.city}
               </div>
@@ -204,14 +209,14 @@ export default function PropertyDetailsPage() {
           <Separator />
 
           <div>
-            <h3 className="text-xl font-semibold mb-2">Descripción</h3>
+            <h3 className="text-xl font-semibold mb-2">Descripción de la Unidad</h3>
             <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
           </div>
 
           <Separator />
 
           <div>
-            <h3 className="text-xl font-semibold mb-3">Características Principales</h3>
+            <h3 className="text-xl font-semibold mb-3">Características Principales de la Unidad</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-md">
               <div className="flex items-center"><BedDouble className="w-5 h-5 mr-2 text-primary" /> {property.bedrooms} Dormitorios</div>
               <div className="flex items-center"><Bath className="w-5 h-5 mr-2 text-primary" /> {property.bathrooms} Baños</div>
@@ -229,7 +234,7 @@ export default function PropertyDetailsPage() {
             <>
               <Separator />
               <div>
-                <h3 className="text-xl font-semibold mb-3">Comodidades</h3>
+                <h3 className="text-xl font-semibold mb-3">Comodidades (Unidad / Condominio)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {property.amenities.map((amenity, index) => (
                     <div key={index} className="flex items-center text-sm bg-secondary/50 p-2 rounded-md">
@@ -283,7 +288,7 @@ export default function PropertyDetailsPage() {
       {/* Placeholder for map */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Ubicación Aproximada</CardTitle>
+          <CardTitle>Ubicación Aproximada del Condominio</CardTitle>
           <CardDescription>La dirección exacta se comparte al coordinar una visita.</CardDescription>
         </CardHeader>
         <CardContent>

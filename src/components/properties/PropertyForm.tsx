@@ -31,6 +31,7 @@ import { Timestamp } from 'firebase/firestore';
 
 const propertyFormSchema = z.object({
   title: z.string().min(5, { message: 'El título debe tener al menos 5 caracteres.' }),
+  condominioName: z.string().min(3, { message: 'El nombre del condominio debe tener al menos 3 caracteres.'}),
   description: z.string().min(20, { message: 'La descripción debe tener al menos 20 caracteres.' }),
   street: z.string().min(3, { message: 'Ingresa la calle.' }),
   number: z.string().optional(),
@@ -81,6 +82,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
     resolver: zodResolver(propertyFormSchema),
     defaultValues: initialData ? {
         title: initialData.title,
+        condominioName: initialData.condominioName,
         description: initialData.description,
         street: initialData.address.street,
         number: initialData.address.number,
@@ -98,6 +100,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
       currency: 'CLP',
       status: 'disponible',
       amenities: [],
+      condominioName: '',
     },
   });
 
@@ -130,8 +133,20 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Título de la Propiedad</FormLabel>
-              <FormControl><Input placeholder="Ej: Moderno departamento en Providencia" {...field} /></FormControl>
+              <FormLabel>Título de la Propiedad / Unidad</FormLabel>
+              <FormControl><Input placeholder="Ej: Departamento 305B" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condominioName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Condominio / Edificio</FormLabel>
+              <FormControl><Input placeholder="Ej: Edificio Central Park" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -142,19 +157,22 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel>Descripción de la Unidad</FormLabel>
               <FormControl><Textarea placeholder="Describe tu propiedad en detalle..." rows={5} {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField control={form.control} name="street" render={({ field }) => ( <FormItem><FormLabel>Calle</FormLabel><FormControl><Input placeholder="Av. Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="number" render={({ field }) => ( <FormItem><FormLabel>Número / Depto (Opcional)</FormLabel><FormControl><Input placeholder="123 / Depto 405" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="commune" render={({ field }) => ( <FormItem><FormLabel>Comuna</FormLabel><FormControl><Input placeholder="Providencia" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="city" render={({ field }) => ( <FormItem><FormLabel>Ciudad</FormLabel><FormControl><Input placeholder="Santiago" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={form.control} name="region" render={({ field }) => ( <FormItem><FormLabel>Región</FormLabel><FormControl><Input placeholder="Metropolitana" {...field} /></FormControl><FormMessage /></FormItem> )} />
+        <div className="space-y-2">
+            <FormLabel>Dirección del Condominio / Edificio</FormLabel>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="street" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Calle</FormLabel><FormControl><Input placeholder="Av. Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="number" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Número (Opcional)</FormLabel><FormControl><Input placeholder="123" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="commune" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Comuna</FormLabel><FormControl><Input placeholder="Providencia" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="city" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Ciudad</FormLabel><FormControl><Input placeholder="Santiago" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="region" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Región</FormLabel><FormControl><Input placeholder="Metropolitana" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -170,8 +188,8 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel className="text-base">Comodidades</FormLabel>
-                <FormDescription>Selecciona las comodidades que ofrece tu propiedad.</FormDescription>
+                <FormLabel className="text-base">Comodidades de la Unidad / Condominio</FormLabel>
+                <FormDescription>Selecciona las comodidades que ofrece la propiedad.</FormDescription>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {allAmenities.map((item) => (
@@ -205,13 +223,13 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
         />
 
         <FormItem>
-            <FormLabel>Imágenes de la Propiedad</FormLabel>
+            <FormLabel>Imágenes de la Unidad</FormLabel>
             <ImageUpload 
                 onFilesChange={handleFilesChange} 
                 existingImageUrls={existingImageUrls}
                 onRemoveExistingImage={handleRemoveExistingImage}
             />
-            <FormDescription>Sube fotos atractivas de tu propiedad. La primera imagen será la principal.</FormDescription>
+            <FormDescription>Sube fotos atractivas de la unidad. La primera imagen será la principal.</FormDescription>
         </FormItem>
 
 
@@ -220,7 +238,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estado de la Propiedad</FormLabel>
+              <FormLabel>Estado de la Unidad</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl><SelectTrigger><SelectValue placeholder="Selecciona un estado" /></SelectTrigger></FormControl>
                 <SelectContent>

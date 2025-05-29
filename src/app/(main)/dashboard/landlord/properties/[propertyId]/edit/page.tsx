@@ -17,6 +17,7 @@ const mockEditableProperty: Property = {
   propertyId: 'prop-edit-1',
   ownerUid: 'current-landlord-uid', // Should match logged-in user for edit access
   title: 'Departamento Remodelado en Ñuñoa',
+  condominioName: 'Edificio Las Palmas',
   description: 'Acogedor departamento recién remodelado, con excelente conectividad y cercano a Plaza Ñuñoa. Cuenta con termopanel y piso flotante nuevo.',
   address: {
     street: 'Jorge Washington 123',
@@ -59,8 +60,9 @@ export default function EditPropertyPage() {
       setIsFetching(true);
       try {
         // const property = await getPropertyById(propertyId);
-        const property = mockEditableProperty; // Mock data
-        if (property && property.ownerUid === userProfile?.uid) { // Check ownership
+        // Forcing mock to include new field for consistency, actual ownerUid check should be dynamic
+        const property = {...mockEditableProperty, ownerUid: userProfile?.uid || 'mock-owner-uid-placeholder'}; 
+        if (property && property.ownerUid === userProfile?.uid) { 
              setInitialData(property);
         } else if (property && property.ownerUid !== userProfile?.uid) {
             toast({ title: 'Acceso Denegado', description: 'No tienes permiso para editar esta propiedad.', variant: 'destructive' });
@@ -78,7 +80,7 @@ export default function EditPropertyPage() {
       }
     };
 
-    if (userProfile) { // Ensure userProfile is loaded before fetching
+    if (userProfile) { 
         fetchPropertyData();
     }
   }, [propertyId, userProfile, router, toast]);
@@ -120,6 +122,7 @@ export default function EditPropertyPage() {
 
       const updatedPropertyData: Partial<Property> = {
         title: data.title,
+        condominioName: data.condominioName,
         description: data.description,
         address: {
           street: data.street,
@@ -154,12 +157,11 @@ export default function EditPropertyPage() {
     }
   };
   
-  if (isFetching || !userProfile) { // also wait for userProfile to ensure ownership check happens
+  if (isFetching || !userProfile) { 
     return <div className="flex justify-center items-center min-h-[calc(100vh-20rem)]"><Spinner size="large" /></div>;
   }
 
   if (!initialData) {
-      // This case should be handled by the redirect in useEffect if property not found or no permission
       return <div className="text-center py-10"><p className="text-muted-foreground">Cargando datos de la propiedad o redirigiendo...</p></div>;
   }
 

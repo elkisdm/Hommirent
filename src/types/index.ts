@@ -13,6 +13,7 @@ export interface Property {
   ownerUid: string;
   title: string;
   description: string;
+  condominioName: string; // Nuevo campo para el nombre del condominio
   address: {
     street: string;
     number?: string; // Optional as some properties might not have a number or it's part of street

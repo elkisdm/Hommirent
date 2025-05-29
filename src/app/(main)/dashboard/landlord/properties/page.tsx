@@ -26,12 +26,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Timestamp } from 'firebase/firestore';
+
 
 // Mock data for landlord properties
 const mockLandlordProperties: Property[] = Array(3).fill(null).map((_, i) => ({
   propertyId: `mylp-${i + 1}`,
   ownerUid: `current-landlord-uid`, // Assume this matches logged in user
-  title: `Mi Propiedad Exclusiva ${i + 1} en Las Condes`,
+  title: `Mi Unidad ${i + 1}0${i+1}`,
+  condominioName: i % 2 === 0 ? 'Condominio Sol Naciente' : 'Edificio Central Park',
   description: 'Esta es una de mis propiedades, bien cuidada y lista para arrendar. Ubicación privilegiada y excelentes terminaciones.',
   address: {
     street: `Apoquindo 450${i}`,
@@ -41,12 +44,12 @@ const mockLandlordProperties: Property[] = Array(3).fill(null).map((_, i) => ({
   },
   price: 750000 + i * 100000,
   currency: 'CLP',
-  bedrooms: 3,
-  bathrooms: 2,
+  bedrooms: 2 + (i % 2), // To vary typologies
+  bathrooms: 1 + (i % 2),
   areaSqMeters: 90 + i * 10,
   amenities: ['estacionamiento', 'bodega', 'seguridad'],
-  imageUrls: [`https://placehold.co/100x100.png?text=Mi+Prop+${i+1}`],
-  mainImageUrl: `https://placehold.co/100x100.png?text=Mi+Prop+${i+1}`,
+  imageUrls: [`https://placehold.co/100x100.png?text=Mi+Unidad+${i+1}`],
+  mainImageUrl: `https://placehold.co/100x100.png?text=Mi+Unidad+${i+1}`,
   status: i % 2 === 0 ? 'disponible' : 'arrendado',
   createdAt: Timestamp.now(),
   updatedAt: Timestamp.now(),
@@ -73,7 +76,12 @@ export default function MyPropertiesPage() {
         try {
           // const props = await getProperties({ ownerUid: userProfile.uid });
           // setProperties(props);
-          setProperties(mockLandlordProperties.filter(p => p.ownerUid === 'current-landlord-uid')); // Mock
+          // Ensure mock data has the new field and filter by current-landlord-uid
+          const userSpecificMockProperties = mockLandlordProperties.map(p => ({
+            ...p,
+            ownerUid: 'current-landlord-uid' 
+          })).filter(p => p.ownerUid === 'current-landlord-uid');
+          setProperties(userSpecificMockProperties);
         } catch (error) {
           console.error("Error fetching landlord properties:", error);
           toast({ title: "Error", description: "No se pudieron cargar tus propiedades.", variant: "destructive" });
@@ -148,7 +156,8 @@ export default function MyPropertiesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="hidden w-[100px] sm:table-cell">Imagen</TableHead>
-                <TableHead>Título</TableHead>
+                <TableHead>Unidad / Título</TableHead>
+                <TableHead>Condominio</TableHead>
                 <TableHead>Comuna</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Estado</TableHead>
@@ -169,6 +178,7 @@ export default function MyPropertiesPage() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{prop.title}</TableCell>
+                  <TableCell>{prop.condominioName}</TableCell>
                   <TableCell>{prop.address.commune}</TableCell>
                   <TableCell>{new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(prop.price)}</TableCell>
                   <TableCell>

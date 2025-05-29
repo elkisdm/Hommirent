@@ -17,6 +17,7 @@ type PropertyFormData = Omit<Property, 'propertyId' | 'ownerUid' | 'createdAt' |
   commune: string;
   city: string;
   region: string;
+  condominioName: string;
 };
 
 
@@ -50,6 +51,7 @@ export default function NewPropertyPage() {
         ownerUid: userProfile.uid,
         title: data.title,
         description: data.description,
+        condominioName: data.condominioName,
         address: {
           street: data.street,
           number: data.number,
