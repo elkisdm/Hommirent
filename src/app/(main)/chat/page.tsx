@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -20,7 +21,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] py-8">
       {!chatStarted ? (
-        <div className="w-full max-w-2xl text-center p-4">
+        <div className="w-full max-w-2xl text-center p-6 md:p-8 bg-muted/50 dark:bg-muted/20 rounded-xl shadow-lg">
           <Sparkles className="h-16 w-16 text-primary mx-auto mb-6" />
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3">
             Asistente de Arriendos IA
