@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -16,6 +17,7 @@ const RentalAssistantInputSchema = z.object({
   location: z.string().optional().describe('The preferred location for the rental property.'),
   priceRange: z.string().optional().describe('The desired price range for the rental property.'),
   bedrooms: z.number().optional().describe('The number of bedrooms required in the rental property.'),
+  propertyContext: z.string().optional().describe('Context about a specific property the user might be viewing or asking about (e.g., property title or ID).'),
 });
 export type RentalAssistantInput = z.infer<typeof RentalAssistantInputSchema>;
 
@@ -33,19 +35,23 @@ const prompt = ai.definePrompt({
   name: 'rentalAssistantPrompt',
   input: {schema: RentalAssistantInputSchema},
   output: {schema: RentalAssistantOutputSchema},
-  prompt: `You are a helpful AI rental assistant. Your goal is to help tenants find suitable rental properties based on their needs and preferences.
+  prompt: `You are a helpful AI rental assistant for Hommie.cl. Your goal is to help tenants find suitable rental properties based on their needs and preferences, and answer questions they might have.
 
-  The tenant will provide a message, and optionally, their preferred location, price range, and number of bedrooms.
+  The tenant will provide a message. They might also provide their preferred location, price range, and number of bedrooms.
+  {{#if propertyContext}}
+  The user is currently interested in or asking about the following property: {{{propertyContext}}}. Keep this in mind when responding.
+  {{/if}}
 
-  Use this information to provide personalized recommendations.
+  Use this information to provide personalized recommendations and answer questions.
 
   Tenant Message: {{{message}}}
-  Location: {{{location}}}
-  Price Range: {{{priceRange}}}
-  Bedrooms: {{{bedrooms}}}
+  {{#if location}}Preferred Location: {{{location}}}{{/if}}
+  {{#if priceRange}}Desired Price Range: {{{priceRange}}}{{/if}}
+  {{#if bedrooms}}Required Bedrooms: {{{bedrooms}}}{{/if}}
 
-  Respond in a friendly and informative manner. If the tenant is asking for specific properties matching location, price range and number of bedrooms, respond with propertyRecommendations as a list of property IDs.
-  If the tenant is just starting the conversation, respond to them normally without providing property recommendations.
+  Respond in a friendly and informative manner. 
+  If the tenant is asking for specific properties matching location, price range, and number of bedrooms, respond with propertyRecommendations as a list of property IDs (if you can identify any from a hypothetical database or prior knowledge).
+  If the tenant is just starting the conversation, or asking general questions, or asking about the specific propertyContext, respond to them normally without necessarily providing new propertyRecommendations unless they explicitly ask for alternatives.
   `,
 });
 

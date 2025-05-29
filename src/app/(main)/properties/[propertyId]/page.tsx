@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -13,6 +14,7 @@ import {
   ChevronLeft, ChevronRight, Heart, ParkingCircle, Archive, Film, Map as MapIcon, Share2, ShieldCheck,
   CheckCircle, Info, CalendarDays, ShoppingBag, Train, School, Hospital, Wallet, FileText, Users,
   CalendarClock, Compass, Layers, RectangleHorizontal as WindowIcon, ChefHat, WashingMachine, Shirt, ThermometerSun, Wind, Palette, Building2, LayoutGrid, Snowflake, Heater,
+  Repeat, Bot,
 } from 'lucide-react';
 import type { Property, Interest } from '@/types';
 import { db, auth } from '@/lib/firebase/config';
@@ -21,6 +23,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { AIChatClient } from '@/components/chat/AIChatClient';
+
 
 // Mock data for a single property, replace with Firestore fetching
 const mockProperty: Property = {
@@ -68,6 +73,7 @@ export default function PropertyDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isExpressingInterest, setIsExpressingInterest] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false); // Placeholder state
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { currentUser, userProfile } = useAuth();
   const { toast } = useToast();
@@ -78,16 +84,25 @@ export default function PropertyDetailsPage() {
     const fetchProperty = async () => {
       setLoading(true);
       try {
-        setProperty(mockProperty);
+        // const propertyDocRef = doc(db, 'properties', propertyId);
+        // const propertyDoc = await getDoc(propertyDocRef);
+        // if (propertyDoc.exists()) {
+        //   setProperty({ propertyId: propertyDoc.id, ...propertyDoc.data() } as Property);
+        // } else {
+        //   toast({ title: "Error", description: "Propiedad no encontrada.", variant: "destructive" });
+        //   router.push('/properties');
+        // }
+        setProperty(mockProperty); // Using mock data for now
       } catch (error) {
         console.error("Error fetching property: ", error);
+        toast({ title: "Error", description: "No se pudo cargar la propiedad.", variant: "destructive" });
       } finally {
         setLoading(false);
       }
     };
 
     fetchProperty();
-  }, [propertyId, router]);
+  }, [propertyId, router, toast]);
 
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: currency }).format(price);
@@ -116,6 +131,13 @@ export default function PropertyDetailsPage() {
     if (!property) return;
     setIsExpressingInterest(true);
     try {
+      // const interestData: Omit<Interest, 'interestId' | 'createdAt'> = {
+      //   propertyId: property.propertyId,
+      //   tenantUid: currentUser.uid,
+      //   ownerUid: property.ownerUid,
+      //   status: 'pendiente',
+      // };
+      // await addDoc(collection(db, 'interests'), { ...interestData, createdAt: serverTimestamp() });
       console.log("Interest expressed (simulated)");
       toast({ title: "¡Interés expresado!", description: "El propietario ha sido notificado. (Simulado)" });
     } catch (error) {
@@ -144,6 +166,7 @@ export default function PropertyDetailsPage() {
   const currentImageUrl = property.imageUrls[currentImageIndex] || property.mainImageUrl;
   const hasParking = property.amenities.some(a => a.toLowerCase().includes('estacionamiento'));
   const hasBodega = property.amenities.some(a => a.toLowerCase().includes('bodega'));
+  const derivedTypology = `${property.bedrooms}D-${property.bathrooms}B`;
 
   const mockData = {
     areaUtilesSqMeters: property.areaSqMeters - 10 > 0 ? property.areaSqMeters -10 : property.areaSqMeters,
@@ -189,8 +212,30 @@ export default function PropertyDetailsPage() {
   return (
     <>
       <div className="max-w-6xl mx-auto py-8 pb-24"> {/* Added pb-24 for fixed bottom bar */}
-        {/* Breadcrumbs Placeholder */}
-        {/* <div className="mb-4 text-sm text-muted-foreground">Inicio &gt; Arriendos en {property.address.commune} &gt; Detalle</div> */}
+        {/* Breadcrumbs Section */}
+        <nav aria-label="Breadcrumb" className="mb-6">
+          <ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">
+            <li><Link href="/properties" className="hover:text-primary">Propiedades</Link></li>
+            <li><ChevronRight className="h-4 w-4" /></li>
+            <li><Link href={`/properties?commune=${encodeURIComponent(property.address.commune)}`} className="hover:text-primary">{property.address.commune}</Link></li>
+            <li><ChevronRight className="h-4 w-4" /></li>
+            {/* Placeholder for Condominio Link - need to decide how to filter by condominio on properties page */}
+            <li><span className="hover:text-primary cursor-pointer" onClick={() => router.push(`/properties?search=${encodeURIComponent(property.condominioName)}`)}>{property.condominioName}</span></li>
+            <li><ChevronRight className="h-4 w-4" /></li>
+            <li><span className="font-medium text-foreground">{derivedTypology}</span></li>
+          </ol>
+        </nav>
+        
+        {/* Placeholder buttons for other units/typologies */}
+        <div className="mb-6 flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" disabled>
+                <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en este edificio (Próximamente)
+            </Button>
+            <Button variant="outline" size="sm" disabled>
+                <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
+            </Button>
+        </div>
+
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -273,7 +318,7 @@ export default function PropertyDetailsPage() {
               <h2 className="text-2xl font-semibold mb-4">Características Principales</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-muted-foreground">
                 {mainCharacteristics.map((char) => (
-                  (char.label === 'Aire Acondicionado' && !mockData.aireAcondicionado && !char.value.toLowerCase().includes('sí') && !char.value.toLowerCase().includes('incluida')) ? null : ( // Conditionally render Aire Acondicionado only if true or explicitly stated
+                  (char.label === 'Aire Acondicionado' && !mockData.aireAcondicionado && !char.value.toLowerCase().includes('sí') && !char.value.toLowerCase().includes('incluida')) ? null : ( 
                   <div key={char.label} className="flex items-start">
                     <char.icon className="w-5 h-5 mr-2.5 mt-0.5 text-primary shrink-0" />
                     <span><strong>{char.label}:</strong> {char.value}</span>
@@ -403,6 +448,29 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
 
+      {/* AI Chat FAB and Sheet */}
+      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="default"
+            size="icon"
+            className="fixed bottom-28 right-6 md:bottom-8 md:right-8 h-14 w-14 rounded-full shadow-lg z-40"
+            aria-label="Abrir chat de IA"
+          >
+            <Bot className="h-7 w-7" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-full md:max-w-md p-0">
+          <SheetHeader className="p-4 border-b">
+            <SheetTitle>Asistente de Arriendos IA</SheetTitle>
+          </SheetHeader>
+          <div className="h-[calc(100%-4.5rem)]"> {/* Adjust height to fill remaining space */}
+            <AIChatClient initialContextMessage={`Tengo una consulta sobre la propiedad: "${property.title}" (ID: ${property.propertyId}) ubicada en ${property.address.commune}.`} />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+
       {/* Fixed Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
@@ -438,4 +506,3 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
-

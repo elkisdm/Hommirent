@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -17,7 +18,11 @@ interface Message {
   recommendations?: string[];
 }
 
-export function AIChatClient() {
+interface AIChatClientProps {
+  initialContextMessage?: string; // For specific property context
+}
+
+export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,27 +43,44 @@ export function AIChatClient() {
   
   useEffect(() => {
     // Initial greeting from AI
-    setMessages([
-      { id: 'initial-greeting', sender: 'ai', text: '¡Hola! Soy tu asistente de arriendos Hommie AI. ¿Cómo puedo ayudarte a encontrar tu próximo hogar hoy?' }
-    ]);
-  }, []);
+    const greeting = { id: 'initial-greeting', sender: 'ai', text: '¡Hola! Soy tu asistente de arriendos Hommie AI. ¿Cómo puedo ayudarte a encontrar tu próximo hogar hoy?' };
+    if (initialContextMessage) {
+      setMessages([greeting]);
+      // Simulate user sending the context message to AI (or AI pre-filling it)
+      // This helps guide the AI for the first real user message
+      // We don't display this context message directly to user, but send it to AI
+      handleSendMessage(initialContextMessage, true);
+    } else {
+      setMessages([greeting]);
+    }
+  }, [initialContextMessage]);
 
 
-  const handleSendMessage = async () => {
-    if (input.trim() === '') return;
+  const handleSendMessage = async (messageToSend?: string, isContextMessage = false) => {
+    const currentInput = messageToSend || input;
+    if (currentInput.trim() === '') return;
 
-    const userMessage: Message = { id: Date.now().toString(), sender: 'user', text: input };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setInput('');
+    if (!isContextMessage) {
+      const userMessage: Message = { id: Date.now().toString(), sender: 'user', text: currentInput };
+      setMessages((prevMessages) => [...prevMessages, userMessage]);
+      setInput('');
+    }
     setIsLoading(true);
 
     try {
       const aiInput: RentalAssistantInput = {
-        message: input,
-        location: location || undefined, // Send if available
+        message: currentInput,
+        location: location || undefined, 
         priceRange: priceRange || undefined,
         bedrooms: bedrooms || undefined,
+        propertyContext: isContextMessage ? undefined : initialContextMessage, // Pass context if it's a regular user message after context was set
       };
+      // If it is the context message itself, we pass it as propertyContext to prime the AI
+      if (isContextMessage) {
+        aiInput.propertyContext = currentInput;
+        aiInput.message = "El usuario está viendo la siguiente propiedad y podría tener preguntas al respecto. "; // Generic starter for AI
+      }
+
       const aiResponse: RentalAssistantOutput = await rentalAssistantChat(aiInput);
       
       const aiMessage: Message = {
@@ -83,7 +105,7 @@ export function AIChatClient() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] bg-card border rounded-lg shadow-sm">
+    <div className="flex flex-col h-full bg-card border-0 rounded-lg shadow-none"> {/* Adjusted for sheet */}
       <ScrollArea className="flex-1 p-4 space-y-4" ref={scrollAreaRef}>
         {messages.map((message) => (
           <div
@@ -139,16 +161,6 @@ export function AIChatClient() {
         )}
       </ScrollArea>
       <div className="p-4 border-t flex items-center space-x-2">
-        {/* Optional inputs for context - can be expanded */}
-        {/* 
-        <Input 
-            type="text" 
-            placeholder="Ubicación (ej: Providencia)" 
-            value={location} 
-            onChange={(e) => setLocation(e.target.value)}
-            className="w-1/4 hidden md:block"
-        /> 
-        */}
         <Input
           type="text"
           placeholder="Escribe tu mensaje..."
@@ -158,7 +170,7 @@ export function AIChatClient() {
           className="flex-1"
           disabled={isLoading}
         />
-        <Button onClick={handleSendMessage} disabled={isLoading || input.trim() === ''}>
+        <Button onClick={() => handleSendMessage()} disabled={isLoading || input.trim() === ''}>
           <Send className="h-4 w-4" />
           <span className="sr-only">Enviar</span>
         </Button>

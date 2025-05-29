@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,18 +15,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LogIn, LogOut, User, Building, MessageSquare } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function UserNav() {
   const { currentUser, userProfile, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await logout();
     router.push('/'); 
   };
 
-  if (!currentUser || !userProfile) {
+  const showLoginSignupButtons = !currentUser && (pathname === '/' || pathname === '/properties');
+
+  if (showLoginSignupButtons) {
     return (
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
@@ -39,6 +43,23 @@ export function UserNav() {
         </Button>
       </div>
     );
+  }
+
+  if (!currentUser || !userProfile) {
+    // If not on homepage and not logged in, show nothing or a minimal login prompt
+    // For now, let's keep it clean and not show anything if not on homepage and not logged in.
+    // Alternatively, a single, less prominent login button could be shown.
+    // This depends on the desired UX for users landing on deep pages without auth.
+    // For this iteration, if not showLoginSignupButtons and no currentUser, it means user is on a non-home page and not logged in.
+    // We can show a single login button here if desired.
+    // Example:
+    // return (
+    //   <Button variant="outline" asChild>
+    //     <Link href={`/login?redirect=${pathname}`}>Iniciar Sesión</Link>
+    //   </Button>
+    // );
+    // For now, returning null if not on home and not logged in.
+    return null; 
   }
 
   const getInitials = (email?: string | null) => {
