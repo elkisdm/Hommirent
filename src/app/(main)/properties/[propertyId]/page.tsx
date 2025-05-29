@@ -507,11 +507,11 @@ export default function PropertyDetailsPage() {
           <Button
             variant="default"
             size="lg" // Make it slightly larger to accommodate text
-            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-40 flex items-center space-x-2 pr-5 group" // Added pr-5 for padding after text
+            className="fixed bottom-24 right-6 md:bottom-20 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group" 
             aria-label="Abrir chat de IA"
           >
             <CurrentFabIcon className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:scale-110" />
-            <span className="text-sm font-medium transition-all duration-300 ease-in-out opacity-100 max-w-xs truncate">
+            <span className="text-sm font-medium transition-all duration-300 ease-in-out opacity-100 max-w-[180px] truncate">
                 {motivationalMessages[currentFabMessageIndex]}
             </span>
           </Button>
