@@ -261,7 +261,7 @@ export default function PropertyDetailsPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto py-8 pb-28"> {/* Increased pb for taller fixed bottom bar + chat FAB */}
+      <div className="max-w-6xl mx-auto py-8 pb-28 md:pb-10">
         {/* Breadcrumbs Section */}
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">
@@ -507,7 +507,7 @@ export default function PropertyDetailsPage() {
           <Button
             variant="default"
             size="lg" // Make it slightly larger to accommodate text
-            className="fixed bottom-24 right-6 md:bottom-20 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group" 
+            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group" 
             aria-label="Abrir chat de IA"
           >
             <CurrentFabIcon className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:scale-110" />
@@ -527,8 +527,8 @@ export default function PropertyDetailsPage() {
       </Sheet>
 
 
-      {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50">
+      {/* Fixed Bottom Bar - Only on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50 md:hidden">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex-1 min-w-0"> {/* For truncation */}
             <h3 className="text-xs sm:text-sm font-semibold truncate" title={property.title}>
