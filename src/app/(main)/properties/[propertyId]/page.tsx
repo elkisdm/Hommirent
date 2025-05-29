@@ -379,11 +379,11 @@ export default function PropertyDetailsPage() {
             </section>
             
             {/* Buttons for other units/typologies */}
-            <div className="my-6 flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm">
+            <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm w-full">
                     <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en {property.condominioName} (Próximamente)
                 </Button>
-                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm">
+                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm w-full">
                     <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
                 </Button>
             </div>
@@ -600,3 +600,4 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
+
