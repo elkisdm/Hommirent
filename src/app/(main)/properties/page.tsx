@@ -330,8 +330,8 @@ export default function PropertiesPage() {
                       <Image 
                         src={condominio.condominioImageUrls[0]} 
                         alt={`Imagen principal de ${condominio.condominioName}`} 
-                        layout="fill" 
-                        objectFit="cover" 
+                        fill
+                        style={{objectFit:"cover"}}
                         data-ai-hint="apartment building exterior"
                         priority
                         className="hover:scale-105 transition-transform duration-300"
@@ -344,8 +344,8 @@ export default function PropertiesPage() {
                             <Image 
                               src={url} 
                               alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`} 
-                              layout="fill" 
-                              objectFit="cover" 
+                              fill
+                              style={{objectFit:"cover"}}
                               data-ai-hint="building facade detail"
                               className="hover:scale-105 transition-transform duration-300"
                             />
@@ -383,11 +383,15 @@ export default function PropertiesPage() {
 
                     {condominio.condominioAmenities && condominio.condominioAmenities.length > 0 && (
                       <div className="pt-2">
-                        <h4 className="text-xs font-semibold mb-1.5 text-muted-foreground tracking-wider uppercase">Comodidades Destacadas del Proyecto</h4>
+                        <h4 className="text-sm font-semibold mb-2 text-foreground/80">Comodidades Destacadas del Proyecto</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioAmenities.map((amenity, idx) => (
-                            <Badge key={idx} variant="outline" className="border-teal-500 text-teal-700 bg-teal-50 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 shadow-sm">
-                              <Sparkles className="mr-1.5 h-3.5 w-3.5 text-teal-500" />
+                            <Badge 
+                              key={idx} 
+                              variant="outline" 
+                              className="border-teal-600 text-teal-600 bg-teal-500/10 hover:bg-teal-500/20 dark:border-teal-500 dark:text-teal-400 dark:bg-teal-500/10 dark:hover:bg-teal-500/20 shadow-sm"
+                            >
+                              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                               {amenity.charAt(0).toUpperCase() + amenity.slice(1)}
                             </Badge>
                           ))}
@@ -397,7 +401,7 @@ export default function PropertiesPage() {
 
                     {condominio.condominioPromotions && condominio.condominioPromotions.length > 0 && (
                       <div className="pt-2">
-                        <h4 className="text-xs font-semibold mb-1.5 text-muted-foreground tracking-wider uppercase">Promociones Vigentes</h4>
+                        <h4 className="text-sm font-semibold mb-2 text-foreground/80">Promociones Vigentes</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioPromotions.map((promo, idx) => (
                             <Badge key={idx} variant="default" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm">
@@ -415,12 +419,12 @@ export default function PropertiesPage() {
                 <Accordion type="multiple" className="w-full">
                   {condominio.typologies.map((typology) => (
                     <AccordionItem value={typology.typologyKey} key={typology.typologyKey} className="border-b-0 mb-2 last:mb-0">
-                      <AccordionTrigger className="text-lg hover:no-underline bg-slate-50 hover:bg-slate-100 px-4 py-3 rounded-md shadow-sm data-[state=open]:rounded-b-none data-[state=open]:bg-slate-100">
+                      <AccordionTrigger className="text-lg hover:no-underline bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 px-4 py-3 rounded-md shadow-sm data-[state=open]:rounded-b-none data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-700">
                         <div className="flex items-center">
                            <BedDouble className="mr-2 h-5 w-5 text-primary" /> Tipología: {typology.typologyName} ({typology.units.length} unidad{typology.units.length !== 1 ? 'es' : ''})
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="pt-4 pb-2 px-2 bg-slate-50 rounded-b-md shadow-sm">
+                      <AccordionContent className="pt-4 pb-2 px-2 bg-slate-50 dark:bg-slate-800 rounded-b-md shadow-sm">
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                           {typology.units.map((unit) => (
                             <PropertyCard key={unit.propertyId} property={unit} />
