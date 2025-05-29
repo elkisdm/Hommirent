@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// RadioGroup and RadioGroupItem are no longer needed
 import { useToast } from '@/hooks/use-toast';
 import { signUp } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -25,8 +26,8 @@ const formSchema = z.object({
   email: z.string().email({ message: 'Por favor ingresa un email válido.' }),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' }),
   confirmPassword: z.string().min(6, { message: 'La confirmación de contraseña debe tener al menos 6 caracteres.' }),
-  role: z.enum(['arrendatario', 'propietario'], { required_error: 'Debes seleccionar un rol.' }),
   displayName: z.string().optional(),
+  // Role is no longer part of the form schema for user input
 }).refine(data => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden.",
   path: ["confirmPassword"],
@@ -43,7 +44,8 @@ export function SignupForm() {
       email: '',
       password: '',
       confirmPassword: '',
-      role: 'arrendatario',
+      displayName: '',
+      // Default role is implicitly 'arrendatario' now
     },
   });
 
@@ -53,12 +55,12 @@ export function SignupForm() {
       await signUp({ 
         email: values.email, 
         password_RAW_VALUE_NEVER_LOG_THIS_OR_STORE_THIS_VARIABLE_except_in_memory: values.password, 
-        role: values.role as UserRole,
+        role: 'arrendatario', // Role is hardcoded to 'arrendatario'
         displayName: values.displayName
       });
       toast({
         title: '¡Registro exitoso!',
-        description: 'Tu cuenta ha sido creada. Serás redirigido.',
+        description: 'Tu cuenta de arrendatario ha sido creada. Serás redirigido.',
       });
       router.push('/'); // Redirect to home or dashboard
     } catch (error: any) {
@@ -128,43 +130,10 @@ export function SignupForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Soy un...</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="arrendatario" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Arrendatario (Busco arriendo)
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="propietario" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Propietario (Ofrezco arriendo)
-                    </FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Role selection RadioGroup is removed */}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? <Spinner size="small" className="mr-2"/> : null}
-          Registrarse
+          Registrarse como Arrendatario
         </Button>
       </form>
     </Form>
