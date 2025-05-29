@@ -225,7 +225,7 @@ export default function PropertiesPage() {
                 <SelectValue placeholder="Todas las comunas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas las comunas</SelectItem>
+                {/* Item for "All communes" is handled by placeholder. Empty value string is not allowed for SelectItem. */}
                 {communes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -237,7 +237,7 @@ export default function PropertiesPage() {
                 <SelectValue placeholder="Cualquier número" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Cualquier número</SelectItem>
+                {/* Item for "Any number" is handled by placeholder. Empty value string is not allowed for SelectItem. */}
                 {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>{n} dorm.</SelectItem>)}
               </SelectContent>
             </Select>
