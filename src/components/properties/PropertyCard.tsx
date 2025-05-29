@@ -15,9 +15,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
   };
 
   return (
-    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
+    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col group">
       <CardHeader className="p-0">
-        <Link href={`/properties/${property.propertyId}`} className="block">
+        <Link href={`/properties/${property.propertyId}`} className="block overflow-hidden">
           <div className="relative h-56 w-full">
             <Image
               src={property.mainImageUrl || `https://placehold.co/600x400.png?text=${encodeURIComponent(property.title)}`}
@@ -25,6 +25,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               layout="fill"
               objectFit="cover"
               data-ai-hint="apartment building"
+              className="transition-transform duration-300 ease-in-out group-hover:scale-105"
             />
           </div>
         </Link>

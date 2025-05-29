@@ -326,7 +326,7 @@ export default function PropertiesPage() {
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
                   {/* Image Mosaic & Video Section */}
                   <div className="w-full lg:w-2/5 space-y-2 flex-shrink-0">
-                    <div className="relative aspect-video rounded-lg overflow-hidden shadow-md">
+                    <div className="relative aspect-video rounded-lg overflow-hidden shadow-md group">
                       <Image 
                         src={condominio.condominioImageUrls[0]} 
                         alt={`Imagen principal de ${condominio.condominioName}`} 
@@ -334,20 +334,20 @@ export default function PropertiesPage() {
                         style={{objectFit:"cover"}}
                         data-ai-hint="apartment building exterior"
                         priority
-                        className="hover:scale-105 transition-transform duration-300"
+                        className="transition-transform duration-300 ease-in-out group-hover:scale-105"
                       />
                     </div>
                     {condominio.condominioImageUrls.length > 1 && (
                       <div className="grid grid-cols-3 gap-2">
                         {condominio.condominioImageUrls.slice(1, Math.min(4, condominio.condominioImageUrls.length)).map((url, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden shadow">
+                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden shadow group">
                             <Image 
                               src={url} 
                               alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`} 
                               fill
                               style={{objectFit:"cover"}}
                               data-ai-hint="building facade detail"
-                              className="hover:scale-105 transition-transform duration-300"
+                              className="transition-transform duration-300 ease-in-out group-hover:scale-105"
                             />
                           </div>
                         ))}
