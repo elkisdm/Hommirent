@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { MapPin, BedDouble, Bath, RulerSquare, Tag, CheckCircle, XCircle, AlertTriangle, Building, UserCircle, MessageSquare } from 'lucide-react';
+import { MapPin, BedDouble, Bath, Square, Tag, CheckCircle, XCircle, AlertTriangle, Building, UserCircle, MessageSquare } from 'lucide-react'; // Changed RulerSquare to Square
 import type { Property, Interest } from '@/types';
 import { db, auth } from '@/lib/firebase/config';
-import { doc, getDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, addDoc, collection, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -215,7 +215,7 @@ export default function PropertyDetailsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-md">
               <div className="flex items-center"><BedDouble className="w-5 h-5 mr-2 text-primary" /> {property.bedrooms} Dormitorios</div>
               <div className="flex items-center"><Bath className="w-5 h-5 mr-2 text-primary" /> {property.bathrooms} Baños</div>
-              <div className="flex items-center"><RulerSquare className="w-5 h-5 mr-2 text-primary" /> {property.areaSqMeters} m²</div>
+              <div className="flex items-center"><Square className="w-5 h-5 mr-2 text-primary" /> {property.areaSqMeters} m²</div>
               <div className="flex items-center">
                 {property.status === 'disponible' ? <CheckCircle className="w-5 h-5 mr-2 text-green-500" /> : <XCircle className="w-5 h-5 mr-2 text-red-500" />}
                 Estado: <span className={`font-medium ml-1 ${property.status === 'disponible' ? 'text-green-600' : 'text-red-600'}`}>

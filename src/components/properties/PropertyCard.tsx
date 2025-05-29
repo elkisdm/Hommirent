@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, BedDouble, Bath, RulerSquare, Tag } from 'lucide-react';
+import { MapPin, BedDouble, Bath, Square, Tag } from 'lucide-react';
 import type { Property } from '@/types';
 
 interface PropertyCardProps {
@@ -46,7 +46,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <Bath className="w-4 h-4 mr-1 text-primary" /> {property.bathrooms} baños
           </div>
           <div className="flex items-center">
-            <RulerSquare className="w-4 h-4 mr-1 text-primary" /> {property.areaSqMeters} m²
+            <Square className="w-4 h-4 mr-1 text-primary" /> {property.areaSqMeters} m² 
           </div>
         </div>
         <p className="text-xl font-semibold text-primary mb-2">{formatPrice(property.price)} <span className="text-xs text-muted-foreground">{property.currency}</span></p>
