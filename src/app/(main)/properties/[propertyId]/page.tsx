@@ -14,7 +14,7 @@ import {
   ChevronLeft, ChevronRight, Heart, ParkingCircle, Archive, Film, Map as MapIcon, Share2, ShieldCheck,
   CheckCircle, Info, CalendarDays, ShoppingBag, Train, School, Hospital, Wallet, FileText, Users,
   CalendarClock, Compass, Layers, RectangleHorizontal as WindowIcon, ChefHat, WashingMachine, Shirt, ThermometerSun, Wind, Palette, Building2, LayoutGrid, Snowflake, Heater,
-  Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View,
+  Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View, Lightbulb, MessageCircleQuestion,
 } from 'lucide-react';
 import type { Property, Interest } from '@/types';
 import { db, auth } from '@/lib/firebase/config';
@@ -63,6 +63,14 @@ const mockProperty: Property = {
   updatedAt: Timestamp.now(),
 };
 
+const motivationalMessages = [
+  "¿Alguna duda? ¡Pregúntame!",
+  "¿Sabías que Providencia tiene muchas ciclovías?",
+  "Estoy aquí para ayudarte.",
+  "Consulta sobre esta propiedad.",
+  "¿Qué te parece esta comuna?",
+];
+
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -74,9 +82,18 @@ export default function PropertyDetailsPage() {
   const [isExpressingInterest, setIsExpressingInterest] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false); // Placeholder state
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [currentFabMessageIndex, setCurrentFabMessageIndex] = useState(0);
+
 
   const { currentUser, userProfile } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFabMessageIndex((prevIndex) => (prevIndex + 1) % motivationalMessages.length);
+    }, 7000); // Change message every 7 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -235,10 +252,16 @@ export default function PropertyDetailsPage() {
     return CheckCircle; // Default icon
   };
 
+  const fabIcon = () => {
+    const icons = [Bot, Lightbulb, MessageCircleQuestion];
+    return icons[currentFabMessageIndex % icons.length];
+  };
+  const CurrentFabIcon = fabIcon();
+
 
   return (
     <>
-      <div className="max-w-6xl mx-auto py-8 pb-24"> {/* Added pb-24 for fixed bottom bar */}
+      <div className="max-w-6xl mx-auto py-8 pb-28"> {/* Increased pb for taller fixed bottom bar + chat FAB */}
         {/* Breadcrumbs Section */}
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">
@@ -425,7 +448,7 @@ export default function PropertyDetailsPage() {
                   <CardHeader><CardTitle className="text-xl">Requisitos Principales</CardTitle></CardHeader>
                   <CardContent className="space-y-1 text-muted-foreground">
                     {mockData.requisitos.map((req, i) => (
-                      <p key={i}><FileText className="inline w-4 h-4 mr-1.5 text-primary" /> {req}</p>
+                      <p key={i} className="flex items-start"><FileText className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> {req}</p>
                     ))}
                     <p className="text-xs mt-2">*Pueden aplicar otros requisitos o variaciones según evaluación.</p>
                   </CardContent>
@@ -483,11 +506,14 @@ export default function PropertyDetailsPage() {
         <SheetTrigger asChild>
           <Button
             variant="default"
-            size="icon"
-            className="fixed bottom-28 right-6 md:bottom-8 md:right-8 h-14 w-14 rounded-full shadow-lg z-40"
+            size="lg" // Make it slightly larger to accommodate text
+            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-40 flex items-center space-x-2 pr-5 group" // Added pr-5 for padding after text
             aria-label="Abrir chat de IA"
           >
-            <Bot className="h-7 w-7" />
+            <CurrentFabIcon className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:scale-110" />
+            <span className="text-sm font-medium transition-all duration-300 ease-in-out opacity-100 max-w-xs truncate">
+                {motivationalMessages[currentFabMessageIndex]}
+            </span>
           </Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-full md:max-w-md p-0">
@@ -536,3 +562,4 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
+
