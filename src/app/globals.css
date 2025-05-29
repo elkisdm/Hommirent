@@ -21,7 +21,7 @@ h1, h2, h3, h4, h5, h6 {
     --foreground: 210 40% 98%; /* Almost white for text */
     --heading-foreground: 0 0% 100%; /* Pure white for headings */
 
-    /* Gradient Colors */
+    /* Gradient Colors for body */
     --gradient-start: 190 100% 14%; /* dark teal/blue: #003B46 */
     --gradient-end: 277 82% 31%;   /* darker purple: #4A148C */
     
@@ -31,8 +31,8 @@ h1, h2, h3, h4, h5, h6 {
     --popover: 224 71% 9%;     /* Darker popover bg */
     --popover-foreground: 210 40% 96%;
 
-    /* Vibrant accents for interactive elements and icons */
-    --primary: 327 90% 54%;  /* Bright Pink/Magenta (Canva-like accent) */
+    /* Interactive elements and icons */
+    --primary: 180 90% 45%;  /* Vibrant Teal */
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
     --secondary: 200 80% 55%; /* Bright Cyan */
@@ -42,11 +42,12 @@ h1, h2, h3, h4, h5, h6 {
     --muted-foreground: 210 40% 70%; /* Lighter muted text */
 
     /* Specific accents for icons/highlights, can add more like --accent-red, --accent-green etc. */
-    --accent: 180 90% 45%;     /* Vibrant Teal/Cyan */
-    --accent-foreground: 0 0% 100%;
+    --accent: 260 80% 60%;     /* Vibrant Purple */
+    --accent-foreground: 0 0% 100%; /* White text on purple accent */
 
-    --accent-orange: 28 90% 53%; /* Coppery Orange from previous theme, can be reused or replaced */
-    --accent-gold: 45 100% 50%;  /* Bright Gold from previous theme */
+    /* Kept from previous theme if needed for specific elements, but main accent is now purple */
+    --accent-orange: 28 90% 53%; 
+    --accent-gold: 45 100% 50%;
 
 
     --destructive: 0 75% 55%; /* A noticeable red */
@@ -55,13 +56,13 @@ h1, h2, h3, h4, h5, h6 {
     --border: 224 71% 20%; /* Subtle dark border */
     --input: 224 71% 12%;  /* Dark input background */
     --input-border-focus: hsl(var(--primary)); /* Focus ring with primary color */
-    --ring: hsl(var(--primary)); /* Ring color for focus states */
+    --ring: hsl(var(--primary)); /* Ring color for focus states (now teal) */
 
-    --chart-1: hsl(var(--primary));
-    --chart-2: hsl(var(--secondary));
-    --chart-3: 39 100% 50%; /* Vibrant Orange */
-    --chart-4: 280 80% 60%; /* Vibrant Purple */
-    --chart-5: 120 70% 45%; /* Vibrant Green */
+    --chart-1: hsl(var(--primary)); /* Teal */
+    --chart-2: hsl(var(--secondary)); /* Cyan */
+    --chart-3: hsl(var(--accent)); /* Purple */
+    --chart-4: 39 100% 50%; /* Vibrant Orange (kept for variety) */
+    --chart-5: 120 70% 45%; /* Vibrant Green (kept for variety) */
 
     --radius: 0.75rem; /* Slightly more rounded */
 
@@ -76,20 +77,13 @@ h1, h2, h3, h4, h5, h6 {
     --sidebar-ring: hsl(var(--ring));
   }
 
-  /* This "light" theme will now be a lighter version of the vibrant style,
-     or could be completely different if needed. For now, let's make it a brighter,
-     less dark version but keeping the vibrancy. This part needs careful consideration
-     if a true "light mode" distinct from Canva's dark aesthetic is required.
-     For now, I'll make it a generic light theme that might not fully match Canva's "light" style.
-  */
   .light {
     --background: 0 0% 100%;
     --foreground: 224 71% 10%;
     --heading-foreground: 224 71% 5%;
 
-    /* Re-evaluating gradient for light mode - perhaps a very subtle light gradient or solid light color */
-    --gradient-start: 200 100% 97%; /* Very light cyan */
-    --gradient-end: 280 100% 98%;   /* Very light purple */
+    --gradient-start: 200 100% 97%; 
+    --gradient-end: 280 100% 98%;   
     
     --card: 0 0% 98%;
     --card-foreground: 224 71% 15%;
@@ -97,16 +91,16 @@ h1, h2, h3, h4, h5, h6 {
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 15%;
 
-    --primary: 315 80% 50%; /* Slightly adjusted Pink for light bg */
+    --primary: 180 70% 40%; /* Teal for light mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 190 70% 45%; /* Adjusted Cyan for light bg */
+    --secondary: 195 70% 45%; /* Cyan for light mode */
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 95%;
     --muted-foreground: 224 71% 25%;
 
-    --accent: 170 80% 40%; /* Adjusted Teal for light bg */
+    --accent: 255 70% 55%; /* Purple for light mode */
     --accent-foreground: 0 0% 100%;
     
     --accent-orange: 25 85% 50%; 
@@ -122,8 +116,8 @@ h1, h2, h3, h4, h5, h6 {
 
     --chart-1: hsl(var(--primary));
     --chart-2: hsl(var(--secondary));
-    --chart-3: 35 90% 55%; 
-    --chart-4: 270 70% 65%;
+    --chart-3: hsl(var(--accent)); 
+    --chart-4: 35 90% 55%; 
     --chart-5: 110 60% 50%;
 
     --sidebar-background: 0 0% 97%;
@@ -163,4 +157,3 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary));
 }
-
