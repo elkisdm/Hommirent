@@ -1,9 +1,11 @@
+
 'use client';
 
 import Link from 'next/link';
 import { MainNav } from './MainNav';
 import { UserNav } from './UserNav';
 import { Building } from 'lucide-react';
+import { ThemeToggleButton } from './ThemeToggleButton';
 
 export function Header() {
   return (
@@ -14,7 +16,8 @@ export function Header() {
           <span className="font-bold text-xl" style={{ fontFamily: 'var(--font-montserrat)'}}>Hommie.cl AI</span>
         </Link>
         <MainNav className="mx-6" />
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <ThemeToggleButton />
           <UserNav />
         </div>
       </div>
