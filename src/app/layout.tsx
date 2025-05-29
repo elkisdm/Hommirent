@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className={`${montserrat.variable} ${openSans.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark" // Set dark theme as default
           enableSystem
           disableTransitionOnChange
         >

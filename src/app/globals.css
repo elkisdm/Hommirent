@@ -4,53 +4,70 @@
 
 body {
   font-family: var(--font-opensans), sans-serif;
+  /* Canva-inspired gradient background */
+  background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  color: hsl(var(--foreground)); /* Ensuring text color is set for the body */
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-montserrat), sans-serif;
+  color: hsl(var(--heading-foreground));
 }
 
 @layer base {
   :root {
-    --background: 30 50% 97%; /* Cream */
-    --foreground: 25 15% 20%;   /* Dark Warm Gray */
+    /* Base dark theme inspired by Canva */
+    --background: 224 71% 4%; /* Fallback if gradient doesn't cover everything, very dark blue */
+    --foreground: 210 40% 98%; /* Almost white for text */
+    --heading-foreground: 0 0% 100%; /* Pure white for headings */
 
-    --card: 0 0% 100%;         /* White */
-    --card-foreground: 25 15% 20%; /* Dark Warm Gray */
+    /* Gradient Colors */
+    --gradient-start: 190 100% 14%; /* dark teal/blue: #003B46 */
+    --gradient-end: 277 82% 31%;   /* darker purple: #4A148C */
+    
+    --card: 224 71% 10%;       /* Dark blue, slightly lighter than bg */
+    --card-foreground: 210 40% 95%; /* Light gray for card text */
 
-    --popover: 0 0% 100%;      /* White */
-    --popover-foreground: 25 15% 20%; /* Dark Warm Gray */
+    --popover: 224 71% 9%;     /* Darker popover bg */
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 28 90% 53%;    /* #F57C00 - Coppery Orange */
-    --primary-foreground: 0 0% 100%; /* White */
+    /* Vibrant accents for interactive elements and icons */
+    --primary: 327 90% 54%;  /* Bright Pink/Magenta (Canva-like accent) */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 30 20% 92%;      /* Light warm gray */
-    --secondary-foreground: 25 15% 25%; /* Slightly darker warm gray */
+    --secondary: 200 80% 55%; /* Bright Cyan */
+    --secondary-foreground: 224 71% 10%; /* Dark text on secondary */
 
-    --muted: 30 20% 92%;          /* Light warm gray */
-    --muted-foreground: 25 15% 45%; /* Medium warm gray for muted text */
+    --muted: 224 71% 15%;         /* Darker muted background */
+    --muted-foreground: 210 40% 70%; /* Lighter muted text */
 
-    --accent: 45 100% 50%;     /* #FFD600 - Bright Gold */
-    --accent-foreground: 25 20% 15%; /* Dark Brown/Black for contrast on gold */
+    /* Specific accents for icons/highlights, can add more like --accent-red, --accent-green etc. */
+    --accent: 180 90% 45%;     /* Vibrant Teal/Cyan */
+    --accent-foreground: 0 0% 100%;
+
+    --accent-orange: 28 90% 53%; /* Coppery Orange from previous theme, can be reused or replaced */
+    --accent-gold: 45 100% 50%;  /* Bright Gold from previous theme */
+
 
     --destructive: 0 75% 55%; /* A noticeable red */
     --destructive-foreground: 0 0% 100%; /* White */
 
-    --border: 30 15% 85%; /* Light warm gray border */
-    --input: 30 15% 85%; /* Light warm gray input border */
-    --ring: 28 80% 60%;        /* Slightly lighter/brighter orange for focus rings */
+    --border: 224 71% 20%; /* Subtle dark border */
+    --input: 224 71% 12%;  /* Dark input background */
+    --input-border-focus: hsl(var(--primary)); /* Focus ring with primary color */
+    --ring: hsl(var(--primary)); /* Ring color for focus states */
 
-    --chart-1: 28 90% 53%; /* Primary Orange */
-    --chart-2: 45 100% 50%; /* Accent Gold */
-    --chart-3: 15 70% 50%; /* Reddish-Orange/Brown */
-    --chart-4: 35 80% 60%; /* Lighter Orange/Peach */
-    --chart-5: 50 60% 70%; /* Light Gold/Yellow */
+    --chart-1: hsl(var(--primary));
+    --chart-2: hsl(var(--secondary));
+    --chart-3: 39 100% 50%; /* Vibrant Orange */
+    --chart-4: 280 80% 60%; /* Vibrant Purple */
+    --chart-5: 120 70% 45%; /* Vibrant Green */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Slightly more rounded */
 
-    /* Sidebar Variables - Light Theme */
-    --sidebar-background: hsl(var(--card));
-    --sidebar-foreground: hsl(var(--card-foreground));
+    /* Sidebar Variables - Dark Theme (Adjusted to match main dark theme) */
+    --sidebar-background: hsl(var(--gradient-end)); /* Use end of gradient for sidebar */
+    --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
     --sidebar-accent: hsl(var(--accent));
@@ -59,49 +76,63 @@ h1, h2, h3, h4, h5, h6 {
     --sidebar-ring: hsl(var(--ring));
   }
 
-  .dark {
-    --background: 25 15% 12%; /* Very Dark Warm Gray/Brown */
-    --foreground: 30 15% 95%;   /* Off-White */
+  /* This "light" theme will now be a lighter version of the vibrant style,
+     or could be completely different if needed. For now, let's make it a brighter,
+     less dark version but keeping the vibrancy. This part needs careful consideration
+     if a true "light mode" distinct from Canva's dark aesthetic is required.
+     For now, I'll make it a generic light theme that might not fully match Canva's "light" style.
+  */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 224 71% 10%;
+    --heading-foreground: 224 71% 5%;
 
-    --card: 25 15% 18%;         /* Darker warm gray for cards */
-    --card-foreground: 30 15% 95%; /* Off-White */
+    /* Re-evaluating gradient for light mode - perhaps a very subtle light gradient or solid light color */
+    --gradient-start: 200 100% 97%; /* Very light cyan */
+    --gradient-end: 280 100% 98%;   /* Very light purple */
+    
+    --card: 0 0% 98%;
+    --card-foreground: 224 71% 15%;
 
-    --popover: 25 15% 18%;      /* Darker warm gray */
-    --popover-foreground: 30 15% 95%; /* Off-White */
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 15%;
 
-    --primary: 30 95% 60%;    /* #FF8F00 - Vibrant Orange for dark mode */
-    --primary-foreground: 25 20% 10%; /* Near Black */
+    --primary: 315 80% 50%; /* Slightly adjusted Pink for light bg */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 15% 22%;      /* Medium-dark warm gray */
-    --secondary-foreground: 30 15% 85%; /* Lighter warm gray */
+    --secondary: 190 70% 45%; /* Adjusted Cyan for light bg */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 25 15% 22%;          /* Medium-dark warm gray */
-    --muted-foreground: 30 15% 65%; /* Medium-light warm gray */
+    --muted: 0 0% 95%;
+    --muted-foreground: 224 71% 25%;
 
-    --accent: 45 100% 65%;     /* #FFEB3B - Bright Yellow/Gold for dark mode */
-    --accent-foreground: 25 20% 10%; /* Near Black */
+    --accent: 170 80% 40%; /* Adjusted Teal for light bg */
+    --accent-foreground: 0 0% 100%;
+    
+    --accent-orange: 25 85% 50%; 
+    --accent-gold: 40 95% 48%;
 
-    --destructive: 0 70% 60%; /* Slightly brighter red for dark mode */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 25 15% 25%; /* Dark warm gray border */
-    --input: 25 15% 25%; /* Dark warm gray input border */
-    --ring: 30 90% 65%;        /* Bright orange for focus rings in dark mode */
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
+    --input-border-focus: hsl(var(--primary));
+    --ring: hsl(var(--primary));
 
-    --chart-1: 30 95% 60%; /* Primary Orange (Dark) */
-    --chart-2: 45 100% 65%; /* Accent Gold (Dark) */
-    --chart-3: 15 75% 55%; /* Reddish-Orange/Brown (Dark) */
-    --chart-4: 35 85% 65%; /* Lighter Orange/Peach (Dark) */
-    --chart-5: 50 65% 75%; /* Light Gold/Yellow (Dark) */
+    --chart-1: hsl(var(--primary));
+    --chart-2: hsl(var(--secondary));
+    --chart-3: 35 90% 55%; 
+    --chart-4: 270 70% 65%;
+    --chart-5: 110 60% 50%;
 
-    /* Sidebar Variables - Dark Theme */
-    --sidebar-background: 25 10% 8%; /* Even darker, almost black with warmth */
-    --sidebar-foreground: 30 10% 75%; /* Muted light gray for sidebar text */
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
     --sidebar-accent: hsl(var(--accent));
     --sidebar-accent-foreground: hsl(var(--accent-foreground));
-    --sidebar-border: 25 10% 15%; /* Subtle border for very dark bg */
+    --sidebar-border: hsl(var(--border));
     --sidebar-ring: hsl(var(--ring));
   }
 }
@@ -110,13 +141,26 @@ h1, h2, h3, h4, h5, h6 {
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  /* body is already styled above with gradient */
   main {
     flex-grow: 1;
   }
 }
+
+/* Custom scrollbar for a more modern feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.7);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+

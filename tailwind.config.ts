@@ -12,6 +12,7 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+        'heading-foreground': 'hsl(var(--heading-foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -34,7 +35,9 @@ export default {
   			},
   			accent: {
   				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
+  				foreground: 'hsl(var(--accent-foreground))',
+          orange: 'hsl(var(--accent-orange))',
+          gold: 'hsl(var(--accent-gold))',
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
@@ -42,6 +45,7 @@ export default {
   			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
+        'input-border-focus': 'hsl(var(--input-border-focus))',
   			ring: 'hsl(var(--ring))',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
@@ -59,12 +63,15 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+        /* Gradient colors for direct use if needed, though body bg is set in globals.css */
+        'gradient-start': 'hsl(var(--gradient-start))',
+        'gradient-end': 'hsl(var(--gradient-end))',
   		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: 'var(--radius)', /* 0.75rem */
+  			md: 'calc(var(--radius) - 0.25rem)', /* 0.5rem */
+  			sm: 'calc(var(--radius) - 0.375rem)' /* 0.375rem */
   		},
   		keyframes: {
   			'accordion-down': {
@@ -87,7 +94,12 @@ export default {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+      boxShadow: {
+        'glow-primary-sm': '0 0 8px 0px hsl(var(--primary)/0.7)',
+        'glow-primary-md': '0 0 15px 2px hsl(var(--primary)/0.6)',
+        'glow-accent-sm': '0 0 8px 0px hsl(var(--accent)/0.7)',
+      }
   	}
   },
   plugins: [require("tailwindcss-animate")],
