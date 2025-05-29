@@ -14,7 +14,7 @@ import {
   ChevronLeft, ChevronRight, Heart, ParkingCircle, Archive, Film, Map as MapIcon, Share2, ShieldCheck,
   CheckCircle, Info, CalendarDays, ShoppingBag, Train, School, Hospital, Wallet, FileText, Users,
   CalendarClock, Compass, Layers, RectangleHorizontal as WindowIcon, ChefHat, WashingMachine, Shirt, ThermometerSun, Wind, Palette, Building2, LayoutGrid, Snowflake, Heater,
-  Repeat, Bot,
+  Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View,
 } from 'lucide-react';
 import type { Property, Interest } from '@/types';
 import { db, auth } from '@/lib/firebase/config';
@@ -208,6 +208,33 @@ export default function PropertyDetailsPage() {
     { label: 'Aire Acondicionado', value: mockData.aireAcondicionado ? 'Sí' : 'No', icon: Snowflake },
   ];
 
+  const getAmenityIcon = (amenity: string) => {
+    const lowerAmenity = amenity.toLowerCase();
+    if (lowerAmenity.includes('piscina')) return Waves;
+    if (lowerAmenity.includes('bodega')) return Archive;
+    if (lowerAmenity.includes('gimnasio') || lowerAmenity.includes('gym')) return Dumbbell;
+    if (lowerAmenity.includes('seguridad') || lowerAmenity.includes('conserje')) return ShieldCheck;
+    if (lowerAmenity.includes('bicicletero')) return Bike;
+    if (lowerAmenity.includes('ascensor')) return ArrowUpDown;
+    if (lowerAmenity.includes('área verde') || lowerAmenity.includes('jardin')) return Trees;
+    if (lowerAmenity.includes('estacionamiento')) return ParkingCircle;
+    if (lowerAmenity.includes('pet-friendly') || lowerAmenity.includes('mascota')) return PawPrint;
+    if (lowerAmenity.includes('sala de evento') || lowerAmenity.includes('quincho')) return PartyPopper;
+    if (lowerAmenity.includes('terraza')) return Sun; // Or View
+    if (lowerAmenity.includes('acceso controlado')) return KeyRound;
+    if (lowerAmenity.includes('juego infantil')) return Puzzle;
+    if (lowerAmenity.includes('lavandería')) return WashingMachine;
+    if (lowerAmenity.includes('sala multiuso') || lowerAmenity.includes('cowork')) return Users;
+    if (lowerAmenity.includes('spa') || lowerAmenity.includes('sauna')) return ThermometerSun; // Placeholder, consider specific icon if needed
+    if (lowerAmenity.includes('cine')) return Tv;
+    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return Wifi;
+    if (lowerAmenity.includes('amoblado')) return Sofa;
+    if (lowerAmenity.includes('aire acondicionado')) return AirVent;
+    if (lowerAmenity.includes('calefacción')) return Heater;
+    if (lowerAmenity.includes('vista') || lowerAmenity.includes('panorámica')) return View;
+    return CheckCircle; // Default icon
+  };
+
 
   return (
     <>
@@ -334,12 +361,15 @@ export default function PropertyDetailsPage() {
                 <section>
                   <h2 className="text-2xl font-semibold mb-4">Amenidades del Edificio / Condominio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
-                    {property.amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center text-muted-foreground">
-                        <CheckCircle className="w-5 h-5 mr-2 text-primary shrink-0" />
-                        {amenity.charAt(0).toUpperCase() + amenity.slice(1)}
-                      </div>
-                    ))}
+                    {property.amenities.map((amenity, index) => {
+                      const AmenityIcon = getAmenityIcon(amenity);
+                      return (
+                        <div key={index} className="flex items-center text-muted-foreground">
+                          <AmenityIcon className="w-5 h-5 mr-2 text-primary shrink-0" />
+                          {amenity.charAt(0).toUpperCase() + amenity.slice(1)}
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               </>
@@ -349,7 +379,7 @@ export default function PropertyDetailsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Información Adicional</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-muted-foreground">
-                <div className="flex items-start"><CheckCircle className="w-5 h-5 mr-2 mt-0.5 text-primary shrink-0" /> <span><strong>Política de Mascotas:</strong> {mockData.politicaMascotas}</span></div>
+                <div className="flex items-start"><PawPrint className="w-5 h-5 mr-2 mt-0.5 text-primary shrink-0" /> <span><strong>Política de Mascotas:</strong> {mockData.politicaMascotas}</span></div>
                 <div className="flex items-start"><CalendarDays className="w-5 h-5 mr-2 mt-0.5 text-primary shrink-0" /> <span><strong>Disponibilidad:</strong> {mockData.disponibilidad}</span></div>
               </div>
             </section>
@@ -372,7 +402,7 @@ export default function PropertyDetailsPage() {
                   <span className="flex items-center"><ShoppingBag className="w-4 h-4 mr-1.5 text-primary"/> Costanera Center</span>
                   <span className="flex items-center"><School className="w-4 h-4 mr-1.5 text-primary"/> Colegio San Ignacio</span>
                   <span className="flex items-center"><Hospital className="w-4 h-4 mr-1.5 text-primary"/> Clínica Indisa</span>
-                  <span className="flex items-center"><MapPin className="w-4 h-4 mr-1.5 text-primary"/> Parque de las Esculturas</span>
+                  <span className="flex items-center"><Trees className="w-4 h-4 mr-1.5 text-primary"/> Parque de las Esculturas</span> {/* Changed MapPin to Trees for variety */}
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">El barrio de {property.address.commune} es conocido por su excelente conectividad, seguridad y vibrante vida urbana, con acceso a parques, ciclovías y una amplia oferta gastronómica y cultural.</p>
               </div>
