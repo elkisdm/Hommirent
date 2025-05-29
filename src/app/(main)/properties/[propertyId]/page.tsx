@@ -31,7 +31,7 @@ import { AIChatClient } from '@/components/chat/AIChatClient';
 const mockProperty: Property = {
   propertyId: 'prop-1',
   ownerUid: 'owner-1',
-  title: 'Luminoso Departamento de 2 Dormitorios con Terraza y Vista Despejada en Providencia',
+  title: 'Luminoso Departamento de 2 Dormitorios con Terraza y Vista Despejada en Providencia', // Original title for metadata or fallback
   condominioName: 'Condominio Vista Azul',
   description: 'Disfruta de atardeceres inolvidables desde su amplia terraza en este espectacular departamento en el corazón de Providencia. Con acabados de lujo, amplios espacios y vistas inigualables, esta propiedad ofrece un estilo de vida moderno y cómodo. Cercano a los mejores restaurantes, tiendas y parques, representa una oportunidad única.\n\nEl departamento cuenta con una excelente distribución, cocina moderna integrada y equipada, y dormitorios espaciosos con closets. El edificio ofrece seguridad 24/7 y excelentes amenidades para toda la familia.',
   address: {
@@ -185,6 +185,18 @@ export default function PropertyDetailsPage() {
   const hasBodega = property.amenities.some(a => a.toLowerCase().includes('bodega'));
   const derivedTypology = `${property.bedrooms}D-${property.bathrooms}B`;
 
+  let unitIdentifier = property.address.number;
+  if (unitIdentifier) {
+      const parts = unitIdentifier.split(' ');
+      if (parts.length > 1 && (parts[0].toLowerCase() === 'depto' || parts[0].toLowerCase() === 'oficina' || parts[0].toLowerCase() === 'casa' || parts[0].toLowerCase() === 'unidad')) {
+          unitIdentifier = parts.slice(1).join(' ');
+      }
+  } else {
+      unitIdentifier = 'N/E'; // No especificado
+  }
+  const displayTitle = `Departamento Número ${unitIdentifier} de ${property.condominioName} - ${derivedTypology}`;
+
+
   const mockData = {
     areaUtilesSqMeters: property.areaSqMeters - 10 > 0 ? property.areaSqMeters -10 : property.areaSqMeters,
     anoConstruccion: 2020,
@@ -215,7 +227,7 @@ export default function PropertyDetailsPage() {
     { label: 'Tipo de Propiedad', value: `Departamento`, icon: Building2 },
     { label: 'Año Construcción', value: `${mockData.anoConstruccion} (Estimado)`, icon: CalendarClock },
     { label: 'Orientación', value: mockData.orientacion, icon: Compass },
-    { label: 'Piso', value: property.address.number?.split(' ')[1] || 'No especificado', icon: Layers },
+    { label: 'Piso', value: property.address.number?.split(' ').find(p => !isNaN(parseInt(p))) || 'No especificado', icon: Layers },
     { label: 'Tipo de Piso', value: mockData.tipoPiso, icon: Palette },
     { label: 'Ventanas', value: mockData.tipoVentanas, icon: WindowIcon },
     { label: 'Cocina', value: mockData.tipoCocina, icon: ChefHat },
@@ -242,7 +254,7 @@ export default function PropertyDetailsPage() {
     if (lowerAmenity.includes('juego infantil')) return Puzzle;
     if (lowerAmenity.includes('lavandería')) return WashingMachine;
     if (lowerAmenity.includes('sala multiuso') || lowerAmenity.includes('cowork')) return Users;
-    if (lowerAmenity.includes('spa') || lowerAmenity.includes('sauna')) return ThermometerSun; // Placeholder, consider specific icon if needed
+    if (lowerAmenity.includes('spa') || lowerAmenity.includes('sauna')) return ThermometerSun;
     if (lowerAmenity.includes('cine')) return Tv;
     if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return Wifi;
     if (lowerAmenity.includes('amoblado')) return Sofa;
@@ -269,23 +281,12 @@ export default function PropertyDetailsPage() {
             <li><ChevronRight className="h-4 w-4" /></li>
             <li><Link href={`/properties?commune=${encodeURIComponent(property.address.commune)}`} className="hover:text-primary">{property.address.commune}</Link></li>
             <li><ChevronRight className="h-4 w-4" /></li>
-            {/* Placeholder for Condominio Link - need to decide how to filter by condominio on properties page */}
             <li><span className="hover:text-primary cursor-pointer" onClick={() => router.push(`/properties?search=${encodeURIComponent(property.condominioName)}`)}>{property.condominioName}</span></li>
             <li><ChevronRight className="h-4 w-4" /></li>
             <li><span className="font-medium text-foreground">{derivedTypology}</span></li>
           </ol>
         </nav>
         
-        {/* Placeholder buttons for other units/typologies */}
-        <div className="mb-6 flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" disabled>
-                <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en este edificio (Próximamente)
-            </Button>
-            <Button variant="outline" size="sm" disabled>
-                <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
-            </Button>
-        </div>
-
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -294,7 +295,7 @@ export default function PropertyDetailsPage() {
             {/* Header Section */}
             <section>
               <div className="flex justify-between items-start mb-2">
-                <h1 className="text-3xl font-bold tracking-tight">{property.title}</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{displayTitle}</h1>
                 <Button variant="ghost" size="icon" onClick={toggleFavorite} title="Guardar Favorito">
                   <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
                 </Button>
@@ -354,6 +355,16 @@ export default function PropertyDetailsPage() {
                 </Button>
               </div>
             </section>
+            
+            {/* Placeholder buttons for other units/typologies - Moved Here */}
+            <div className="my-6 flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" disabled>
+                    <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en este edificio (Próximamente)
+                </Button>
+                <Button variant="outline" size="sm" disabled>
+                    <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
+                </Button>
+            </div>
 
             <Separator />
 
@@ -425,7 +436,7 @@ export default function PropertyDetailsPage() {
                   <span className="flex items-center"><ShoppingBag className="w-4 h-4 mr-1.5 text-primary"/> Costanera Center</span>
                   <span className="flex items-center"><School className="w-4 h-4 mr-1.5 text-primary"/> Colegio San Ignacio</span>
                   <span className="flex items-center"><Hospital className="w-4 h-4 mr-1.5 text-primary"/> Clínica Indisa</span>
-                  <span className="flex items-center"><Trees className="w-4 h-4 mr-1.5 text-primary"/> Parque de las Esculturas</span> {/* Changed MapPin to Trees for variety */}
+                  <span className="flex items-center"><Trees className="w-4 h-4 mr-1.5 text-primary"/> Parque de las Esculturas</span>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">El barrio de {property.address.commune} es conocido por su excelente conectividad, seguridad y vibrante vida urbana, con acceso a parques, ciclovías y una amplia oferta gastronómica y cultural.</p>
               </div>
@@ -438,10 +449,10 @@ export default function PropertyDetailsPage() {
                 <Card>
                   <CardHeader><CardTitle className="text-xl">Resumen de Costos Iniciales</CardTitle></CardHeader>
                   <CardContent className="space-y-1 text-muted-foreground">
-                    <p><Wallet className="inline w-4 h-4 mr-1.5 text-primary" /> Mes de arriendo: {formatPrice(property.price, property.currency)}</p>
-                    <p><Wallet className="inline w-4 h-4 mr-1.5 text-primary" /> Mes de garantía: {formatPrice(property.price, property.currency)} (1 mes)</p>
-                    <p><Wallet className="inline w-4 h-4 mr-1.5 text-primary" /> Comisión: {mockData.comisionArrendatario}</p>
-                    <p><Wallet className="inline w-4 h-4 mr-1.5 text-primary" /> Gastos notariales: Aprox. $25.000 CLP (Referencial)</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de arriendo: {formatPrice(property.price, property.currency)}</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de garantía: {formatPrice(property.price, property.currency)} (1 mes)</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Comisión: {mockData.comisionArrendatario}</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Gastos notariales: Aprox. $25.000 CLP (Referencial)</p>
                   </CardContent>
                 </Card>
                 <Card>
@@ -506,7 +517,7 @@ export default function PropertyDetailsPage() {
         <SheetTrigger asChild>
           <Button
             variant="default"
-            size="lg" // Make it slightly larger to accommodate text
+            size="lg" 
             className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group" 
             aria-label="Abrir chat de IA"
           >
@@ -520,7 +531,7 @@ export default function PropertyDetailsPage() {
           <SheetHeader className="p-4 border-b">
             <SheetTitle>Asistente de Arriendos IA</SheetTitle>
           </SheetHeader>
-          <div className="h-[calc(100%-4.5rem)]"> {/* Adjust height to fill remaining space */}
+          <div className="h-[calc(100%-4.5rem)]">
             <AIChatClient initialContextMessage={`Tengo una consulta sobre la propiedad: "${property.title}" (ID: ${property.propertyId}) ubicada en ${property.address.commune}.`} />
           </div>
         </SheetContent>
@@ -530,9 +541,9 @@ export default function PropertyDetailsPage() {
       {/* Fixed Bottom Bar - Only on mobile */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50 md:hidden">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex-1 min-w-0"> {/* For truncation */}
+          <div className="flex-1 min-w-0">
             <h3 className="text-xs sm:text-sm font-semibold truncate" title={property.title}>
-              {property.title}
+              {displayTitle} {/* Use the new displayTitle here too */}
             </h3>
             <p className="text-md sm:text-lg font-bold text-primary">
               {formatPrice(property.price, property.currency)}
