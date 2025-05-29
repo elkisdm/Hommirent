@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ const mockProperties: Property[] = [
     propertyId: `prop-condo1-tip1-1`,
     ownerUid: `owner-1`,
     title: `Unidad 101 - 2D1B`,
-    condominioName: 'Condominio Las Torres',
+    condominioName: 'Las Torres',
     description: 'Acogedora unidad en primer piso, ideal para parejas.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 500000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 60,
@@ -35,7 +36,7 @@ const mockProperties: Property[] = [
     propertyId: `prop-condo1-tip1-2`,
     ownerUid: `owner-2`,
     title: `Unidad 201 - 2D1B`,
-    condominioName: 'Condominio Las Torres',
+    condominioName: 'Las Torres',
     description: 'Luminosa unidad con vista despejada.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 520000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 62,
@@ -48,7 +49,7 @@ const mockProperties: Property[] = [
     propertyId: `prop-condo1-tip2-1`,
     ownerUid: `owner-3`,
     title: `Unidad 305 - 3D2B`,
-    condominioName: 'Condominio Las Torres',
+    condominioName: 'Las Torres',
     description: 'Amplia unidad familiar con terraza.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 650000, currency: 'CLP', bedrooms: 3, bathrooms: 2, areaSqMeters: 85,
@@ -61,7 +62,7 @@ const mockProperties: Property[] = [
     propertyId: `prop-condo2-tip1-1`,
     ownerUid: `owner-4`,
     title: `Depto. 50A - 1D1B`,
-    condominioName: 'Edificio Central Park',
+    condominioName: 'Central Park',
     description: 'Moderno estudio perfecto para profesionales.',
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 400000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 40,
@@ -74,7 +75,7 @@ const mockProperties: Property[] = [
     propertyId: `prop-condo2-tip2-1`,
     ownerUid: `owner-5`,
     title: `Depto. 80C - 2D2B`,
-    condominioName: 'Edificio Central Park',
+    condominioName: 'Central Park',
     description: 'Departamento con excelente distribución y luz natural.',
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 580000, currency: 'CLP', bedrooms: 2, bathrooms: 2, areaSqMeters: 70,
@@ -220,11 +221,11 @@ export default function PropertiesPage() {
           address: condoDetails.address, // Store the address of the first unit as condo address
           typologies: typologies.sort((a,b) => a.typologyName.localeCompare(b.typologyName)), // Sort typologies by name
           condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/600x400.png?text=${encodeURIComponent(condominioName)}`],
-          condominioVideoUrl: condominioName.includes("Torres") ? 'https://www.youtube.com/embed/LXb3EKWsInQ' : undefined, // Sample video for one condo
+          condominioVideoUrl: condominioName.toLowerCase().includes("torres") ? 'https://www.youtube.com/embed/LXb3EKWsInQ' : undefined, // Sample video for one
           condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6), // Show up to 6 unique amenities
-          condominioPromotions: condominioName.includes("Park") 
+          condominioPromotions: condominioName.toLowerCase().includes("park") 
             ? [{ text: "Primer mes 50% OFF", icon: Gift }, {text: "GGCC gratis x 3 meses", icon: Star}] 
-            : (condominioName.includes("Torres") ? [{text: "Tour virtual disponible", icon: PlayCircle}] : []),
+            : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle}] : []),
         });
       }
     });
@@ -253,7 +254,7 @@ export default function PropertiesPage() {
     <div className="space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Encuentra tu Próximo Hogar</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Explora las unidades disponibles en nuestros condominios.</p>
+        <p className="mt-2 text-lg text-muted-foreground">Explora las unidades disponibles en nuestros proyectos.</p>
       </div>
 
       {/* Filters Section */}
@@ -263,7 +264,7 @@ export default function PropertiesPage() {
             <label htmlFor="search" className="text-sm font-medium">Buscar</label>
             <Input 
                 id="search"
-                placeholder="Condominio, comuna, características..." 
+                placeholder="Proyecto, comuna, características..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -382,7 +383,7 @@ export default function PropertiesPage() {
 
                     {condominio.condominioAmenities && condominio.condominioAmenities.length > 0 && (
                       <div className="pt-2">
-                        <h4 className="text-xs font-semibold mb-1.5 text-muted-foreground tracking-wider uppercase">Comodidades Destacadas</h4>
+                        <h4 className="text-xs font-semibold mb-1.5 text-muted-foreground tracking-wider uppercase">Comodidades Destacadas del Proyecto</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioAmenities.map((amenity, idx) => (
                             <Badge key={idx} variant="outline" className="border-teal-500 text-teal-700 bg-teal-50 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 shadow-sm">
@@ -437,3 +438,4 @@ export default function PropertiesPage() {
     </div>
   );
 }
+

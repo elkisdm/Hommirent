@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +32,7 @@ import { Timestamp } from 'firebase/firestore';
 
 const propertyFormSchema = z.object({
   title: z.string().min(5, { message: 'El título debe tener al menos 5 caracteres.' }),
-  condominioName: z.string().min(3, { message: 'El nombre del condominio debe tener al menos 3 caracteres.'}),
+  condominioName: z.string().min(3, { message: 'El nombre del proyecto/edificio debe tener al menos 3 caracteres.'}),
   description: z.string().min(20, { message: 'La descripción debe tener al menos 20 caracteres.' }),
   street: z.string().min(3, { message: 'Ingresa la calle.' }),
   number: z.string().optional(),
@@ -145,7 +146,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           name="condominioName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre del Condominio / Edificio</FormLabel>
+              <FormLabel>Nombre del Proyecto / Edificio</FormLabel>
               <FormControl><Input placeholder="Ej: Edificio Central Park" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
@@ -165,7 +166,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
         />
 
         <div className="space-y-2">
-            <FormLabel>Dirección del Condominio / Edificio</FormLabel>
+            <FormLabel>Dirección del Proyecto / Edificio</FormLabel>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="street" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Calle</FormLabel><FormControl><Input placeholder="Av. Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={form.control} name="number" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Número (Opcional)</FormLabel><FormControl><Input placeholder="123" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -188,7 +189,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel className="text-base">Comodidades de la Unidad / Condominio</FormLabel>
+                <FormLabel className="text-base">Comodidades de la Unidad / Proyecto</FormLabel>
                 <FormDescription>Selecciona las comodidades que ofrece la propiedad.</FormDescription>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -260,3 +261,4 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
     </Form>
   );
 }
+

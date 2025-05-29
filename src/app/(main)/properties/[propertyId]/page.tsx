@@ -32,7 +32,7 @@ const mockProperty: Property = {
   propertyId: 'prop-1',
   ownerUid: 'owner-1',
   title: 'Luminoso Departamento de 2 Dormitorios con Terraza y Vista Despejada en Providencia', // Original title for metadata or fallback
-  condominioName: 'Condominio Vista Azul',
+  condominioName: 'Vista Azul', // Example: Could be "Edificio Vista Azul" or just "Vista Azul"
   description: 'Disfruta de atardeceres inolvidables desde su amplia terraza en este espectacular departamento en el corazón de Providencia. Con acabados de lujo, amplios espacios y vistas inigualables, esta propiedad ofrece un estilo de vida moderno y cómodo. Cercano a los mejores restaurantes, tiendas y parques, representa una oportunidad única.\n\nEl departamento cuenta con una excelente distribución, cocina moderna integrada y equipada, y dormitorios espaciosos con closets. El edificio ofrece seguridad 24/7 y excelentes amenidades para toda la familia.',
   address: {
     street: 'Las Violetas 123',
@@ -194,10 +194,10 @@ export default function PropertyDetailsPage() {
   } else {
       unitIdentifier = 'N/E'; // No especificado
   }
-  const displayTitle = `Departamento Número ${unitIdentifier} de ${property.condominioName} - ${derivedTypology}`;
+  const displayTitle = `Departamento Número ${unitIdentifier} ${property.condominioName} - ${derivedTypology}`;
 
 
-  const mockData = {
+  const mockData = { // These would ideally come from property object if schema extended
     areaUtilesSqMeters: property.areaSqMeters - 10 > 0 ? property.areaSqMeters -10 : property.areaSqMeters,
     anoConstruccion: 2020,
     orientacion: 'Nororiente',
@@ -356,10 +356,10 @@ export default function PropertyDetailsPage() {
               </div>
             </section>
             
-            {/* Placeholder buttons for other units/typologies - Moved Here */}
+            {/* Buttons for other units/typologies */}
             <div className="my-6 flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" disabled>
-                    <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en este edificio (Próximamente)
+                    <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en {property.condominioName} (Próximamente)
                 </Button>
                 <Button variant="outline" size="sm" disabled>
                     <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
@@ -393,7 +393,7 @@ export default function PropertyDetailsPage() {
               <>
                 <Separator />
                 <section>
-                  <h2 className="text-2xl font-semibold mb-4">Amenidades del Edificio / Condominio</h2>
+                  <h2 className="text-2xl font-semibold mb-4">Amenidades del Proyecto / Edificio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
                     {property.amenities.map((amenity, index) => {
                       const AmenityIcon = getAmenityIcon(amenity);
@@ -542,8 +542,8 @@ export default function PropertyDetailsPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50 md:hidden">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex-1 min-w-0">
-            <h3 className="text-xs sm:text-sm font-semibold truncate" title={property.title}>
-              {displayTitle} {/* Use the new displayTitle here too */}
+            <h3 className="text-xs sm:text-sm font-semibold truncate" title={displayTitle}>
+              {displayTitle}
             </h3>
             <p className="text-md sm:text-lg font-bold text-primary">
               {formatPrice(property.price, property.currency)}
