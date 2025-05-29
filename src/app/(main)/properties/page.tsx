@@ -35,14 +35,14 @@ const mockProperties: Property[] = [
   {
     propertyId: `prop-condo1-tip1-2`,
     ownerUid: `owner-2`,
-    title: `Unidad 201 - 2D1B`,
+    title: `Unidad 201 - Estudio`,
     condominioName: 'Las Torres',
-    description: 'Luminosa unidad con vista despejada.',
+    description: 'Luminosa unidad con vista despejada. Moderno Estudio.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
-    price: 520000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 62,
+    price: 380000, currency: 'CLP', bedrooms: 0, bathrooms: 1, areaSqMeters: 35,
     amenities: ['estacionamiento', 'balcon', 'piscina'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+2D1B+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`], 
-    mainImageUrl: `https://placehold.co/600x400.png?text=Torres+2D1B+B`,
+    imageUrls: [`https://placehold.co/600x400.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`], 
+    mainImageUrl: `https://placehold.co/600x400.png?text=Torres+Estudio+B`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
@@ -61,14 +61,14 @@ const mockProperties: Property[] = [
   {
     propertyId: `prop-condo2-tip1-1`,
     ownerUid: `owner-4`,
-    title: `Depto. 50A - 1D1B`,
+    title: `Depto. 50A - Loft Urbano`,
     condominioName: 'Central Park',
-    description: 'Moderno estudio perfecto para profesionales.',
+    description: 'Moderno Loft perfecto para profesionales.',
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
-    price: 400000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 40,
+    price: 450000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 50,
     amenities: ['gimnasio', 'sala multiuso', 'lavanderia', 'quincho'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Central+1D1B+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`], 
-    mainImageUrl: `https://placehold.co/600x400.png?text=Central+1D1B+D`,
+    imageUrls: [`https://placehold.co/600x400.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`], 
+    mainImageUrl: `https://placehold.co/600x400.png?text=Central+Loft+D`,
     status: 'arrendado', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
@@ -82,6 +82,19 @@ const mockProperties: Property[] = [
     amenities: ['estacionamiento', 'gimnasio', 'piscina', 'quincho', 'seguridad'],
     imageUrls: [`https://placehold.co/600x400.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`], 
     mainImageUrl: `https://placehold.co/600x400.png?text=Central+2D2B+E`,
+    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
+  },
+   {
+    propertyId: `prop-condo3-tip4-1`,
+    ownerUid: `owner-6`,
+    title: `Casa Familiar - 4D3B`,
+    condominioName: 'Valle Escondido',
+    description: 'Espaciosa casa en Las Condes con gran jardín.',
+    address: { street: `Valle Escondido 700`, commune: 'Las Condes', city: 'Santiago', region: 'Metropolitana' },
+    price: 1200000, currency: 'CLP', bedrooms: 4, bathrooms: 3, areaSqMeters: 220,
+    amenities: ['estacionamiento', 'jardin', 'piscina', 'seguridad'],
+    imageUrls: [`https://placehold.co/600x400.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`], 
+    mainImageUrl: `https://placehold.co/600x400.png?text=Valle+4D3B+F`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
 ];
@@ -107,6 +120,25 @@ interface CondominioGroup {
   address?: Property['address']; 
 }
 
+const santiagoMetropolitanCommunes: string[] = [
+  // Provincia de Santiago
+  "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", 
+  "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", 
+  "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", 
+  "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", 
+  "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura",
+  // Provincia de Cordillera
+  "Puente Alto", "Pirque", "San José de Maipo",
+  // Provincia de Maipo
+  "San Bernardo", "Buin", "Calera de Tango", "Paine",
+  // Provincia de Melipilla
+  "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro",
+  // Provincia de Talagante
+  "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor",
+  // Provincia de Chacabuco
+  "Colina", "Lampa", "Tiltil"
+].sort();
+
 
 export default function PropertiesPage() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -118,7 +150,10 @@ export default function PropertiesPage() {
   const [bedroomsFilter, setBedroomsFilter] = useState('');
 
   const getTypologyKey = (property: Property): string => `${property.bedrooms}D-${property.bathrooms}B`;
-  const getTypologyName = (property: Property): string => `${property.bedrooms} Dormitorio${property.bedrooms !== 1 ? 's' : ''}, ${property.bathrooms} Baño${property.bathrooms !== 1 ? 's' : ''}`;
+  const getTypologyName = (property: Property): string => {
+    if (property.bedrooms === 0) return `Estudio, ${property.bathrooms} Baño${property.bathrooms !== 1 ? 's' : ''}`;
+    return `${property.bedrooms} Dormitorio${property.bedrooms !== 1 ? 's' : ''}, ${property.bathrooms} Baño${property.bathrooms !== 1 ? 's' : ''}`;
+  }
 
 
   useEffect(() => {
@@ -157,9 +192,22 @@ export default function PropertiesPage() {
     if (communeFilter) {
       filtered = filtered.filter(p => p.address.commune === communeFilter);
     }
+
     if (bedroomsFilter) {
-      filtered = filtered.filter(p => p.bedrooms === parseInt(bedroomsFilter));
+      if (bedroomsFilter === "0") { // Estudio
+        filtered = filtered.filter(p => p.bedrooms === 0);
+      } else if (bedroomsFilter === "4+") { // 4+ Dormitorios
+        filtered = filtered.filter(p => p.bedrooms >= 4);
+      } else if (bedroomsFilter === "loft") { // Loft - approximated as 1 bedroom for filter
+        filtered = filtered.filter(p => p.bedrooms === 1); // Could also check title/desc for "loft" if needed
+      } else {
+        const numBedrooms = parseInt(bedroomsFilter);
+        if (!isNaN(numBedrooms)) {
+          filtered = filtered.filter(p => p.bedrooms === numBedrooms);
+        }
+      }
     }
+
     if (priceRangeFilter) {
       const [min, max] = priceRangeFilter.split('-').map(Number);
       if (!isNaN(min) && !isNaN(max)) {
@@ -172,19 +220,15 @@ export default function PropertiesPage() {
     }
 
     const condominiosMap = new Map<string, Map<string, Property[]>>();
-    // Store additional details per condominio (images, amenities, address)
     const condominioDetailsMap = new Map<string, { images: Set<string>, amenities: Set<string>, address?: Property['address']}>();
 
     filtered.forEach(property => {
       if (!condominiosMap.has(property.condominioName)) {
         condominiosMap.set(property.condominioName, new Map<string, Property[]>());
-        // Initialize details for the new condominio
         condominioDetailsMap.set(property.condominioName, { images: new Set(), amenities: new Set(), address: property.address });
       }
       
-      // Aggregate images and amenities from each unit for the condominio view
       const details = condominioDetailsMap.get(property.condominioName)!;
-      // Add mainImageUrl first, then other images, limit to avoid too many
       details.images.add(property.mainImageUrl);
       property.imageUrls.forEach(img => details.images.add(img));
       property.amenities.forEach(am => details.amenities.add(am));
@@ -206,23 +250,31 @@ export default function PropertiesPage() {
           typologies.push({
             typologyKey,
             typologyName: getTypologyName(units[0]),
-            units: units.sort((a,b) => a.price - b.price), // Sort units by price within typology
+            units: units.sort((a,b) => a.price - b.price), 
           });
         }
       });
 
       if (typologies.length > 0) {
         const condoDetails = condominioDetailsMap.get(condominioName)!;
-        // Take up to 4 unique images for the mosaic (1 main, 3 thumbs)
         const uniqueImageUrls = Array.from(condoDetails.images).slice(0, 4); 
         
         grouped.push({
           condominioName,
-          address: condoDetails.address, // Store the address of the first unit as condo address
-          typologies: typologies.sort((a,b) => a.typologyName.localeCompare(b.typologyName)), // Sort typologies by name
+          address: condoDetails.address, 
+          typologies: typologies.sort((a,b) => {
+            // Sort typologies: Estudio first, then by number of bedrooms, then Loft
+            const getSortValue = (name: string) => {
+              if (name.startsWith("Estudio")) return 0;
+              if (name.includes("Loft")) return 50; // Arbitrary large number for Loft at end if not by bedroom
+              const beds = parseInt(name.split("D")[0]);
+              return isNaN(beds) ? 99 : beds;
+            };
+            return getSortValue(a.typologyName) - getSortValue(b.typologyName);
+          }),
           condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/600x400.png?text=${encodeURIComponent(condominioName)}`],
-          condominioVideoUrl: condominioName.toLowerCase().includes("torres") ? 'https://www.youtube.com/embed/LXb3EKWsInQ' : undefined, // Sample video for one
-          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6), // Show up to 6 unique amenities
+          condominioVideoUrl: condominioName.toLowerCase().includes("torres") ? 'https://www.youtube.com/embed/LXb3EKWsInQ' : undefined, 
+          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6), 
           condominioPromotions: condominioName.toLowerCase().includes("park") 
             ? [{ text: "Primer mes 50% OFF", icon: Gift }, {text: "GGCC gratis x 3 meses", icon: Star}] 
             : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle}] : []),
@@ -230,12 +282,10 @@ export default function PropertiesPage() {
       }
     });
     
-    // Sort condominios by name
     setGroupedProperties(grouped.sort((a,b) => a.condominioName.localeCompare(b.condominioName)));
 
   }, [searchTerm, communeFilter, priceRangeFilter, bedroomsFilter, allProperties]);
 
-  const communes = [...new Set(allProperties.map(p => p.address.commune))].sort();
   const priceRanges = [
     { label: 'Hasta $500.000', value: '0-500000'},
     { label: '$500.001 - $800.000', value: '500001-800000'},
@@ -276,18 +326,23 @@ export default function PropertiesPage() {
                 <SelectValue placeholder="Todas las comunas" />
               </SelectTrigger>
               <SelectContent>
-                {communes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <label htmlFor="bedrooms" className="text-sm font-medium">Dormitorios</label>
+            <label htmlFor="bedrooms" className="text-sm font-medium">Tipología</label>
             <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
               <SelectTrigger id="bedrooms">
-                <SelectValue placeholder="Cualquier número" />
+                <SelectValue placeholder="Cualquier tipología" />
               </SelectTrigger>
               <SelectContent>
-                {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>{n} dorm.</SelectItem>)}
+                <SelectItem value="0">Estudio</SelectItem>
+                <SelectItem value="1">1 Dormitorio</SelectItem>
+                <SelectItem value="2">2 Dormitorios</SelectItem>
+                <SelectItem value="3">3 Dormitorios</SelectItem>
+                <SelectItem value="4+">4+ Dormitorios</SelectItem>
+                <SelectItem value="loft">Loft</SelectItem>
               </SelectContent>
             </Select>
           </div>
