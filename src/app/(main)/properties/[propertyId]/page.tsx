@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { AIChatClient } from '@/components/chat/AIChatClient';
+import { FirstPaymentCalculator } from '@/components/properties/FirstPaymentCalculator';
 
 
 // Mock data for a single property, replace with Firestore fetching
@@ -321,8 +322,8 @@ export default function PropertyDetailsPage() {
                     <Image
                       src={currentImageUrl}
                       alt={`${property.title} - imagen ${currentImageIndex + 1}`}
-                      layout="fill"
-                      objectFit="cover"
+                      fill // Changed from layout="fill" to fill
+                      style={{objectFit:"cover"}} // Changed from objectFit="cover"
                       priority
                       data-ai-hint="apartment interior stylish"
                     />
@@ -424,7 +425,7 @@ export default function PropertyDetailsPage() {
               <Card>
                 <CardContent className="p-0">
                   <AspectRatio ratio={16/9} className="bg-muted rounded-md flex items-center justify-center">
-                    <Image src="https://placehold.co/800x450.png?text=Mapa+Interactivo+Placeholder" alt="Mapa Placeholder" data-ai-hint="map location city" layout="fill" objectFit="cover" className="rounded-md opacity-70" />
+                    <Image src="https://placehold.co/800x450.png?text=Mapa+Interactivo+Placeholder" alt="Mapa Placeholder" data-ai-hint="map location city" fill style={{objectFit:"cover"}} className="rounded-md opacity-70" />
                     <p className="z-10 text-lg font-semibold text-background bg-black/50 p-2 rounded">Mapa (Integración futura)</p>
                   </AspectRatio>
                 </CardContent>
@@ -465,6 +466,11 @@ export default function PropertyDetailsPage() {
                   </CardContent>
                 </Card>
               </div>
+            </section>
+             {/* First Payment Calculator Section */}
+            <Separator className="my-8" />
+            <section>
+                <FirstPaymentCalculator monthlyRent={property.price} currency={property.currency} />
             </section>
           </div>
 
@@ -573,4 +579,3 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
-
