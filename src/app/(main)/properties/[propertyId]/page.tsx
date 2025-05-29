@@ -223,6 +223,15 @@ export default function PropertyDetailsPage() {
       'Aval podría ser requerido según evaluación',
     ]
   };
+  
+  const unitHighlights = [
+    { label: 'Amplia Terraza', icon: Sun, present: property.description.toLowerCase().includes('terraza') || property.amenities.some(a => a.toLowerCase().includes('terraza')) },
+    { label: 'Cocina Equipada', icon: ChefHat, present: mockData.tipoCocina.toLowerCase().includes('equipada') },
+    { label: 'Ventanas Termopanel', icon: WindowIcon, present: mockData.tipoVentanas.toLowerCase().includes('termopanel') },
+    { label: 'Pet-Friendly', icon: PawPrint, present: property.amenities.some(a => a.toLowerCase().includes('pet-friendly')) || mockData.politicaMascotas.toLowerCase().includes('sí') },
+    { label: 'Walk-in Closet', icon: Shirt, present: mockData.walkInCloset },
+  ].filter(h => h.present);
+
 
   const mainCharacteristics = [
     { label: 'Tipo de Propiedad', value: `Departamento`, icon: Building2 },
@@ -301,57 +310,68 @@ export default function PropertyDetailsPage() {
                   <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
                 </Button>
               </div>
-              <div className="flex items-center text-muted-foreground mb-4">
+              <div className="flex items-center text-muted-foreground mb-3">
                 <MapPin className="w-5 h-5 mr-2 text-primary" />
                 {property.address.street}{property.address.number ? `, ${property.address.number}` : ''}, {property.address.commune}
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
                 <span className="flex items-center"><BedDouble className="w-4 h-4 mr-1.5 text-primary" /> {property.bedrooms} Dormitorios</span>
                 <span className="flex items-center"><Bath className="w-4 h-4 mr-1.5 text-primary" /> {property.bathrooms} Baños</span>
                 <span className="flex items-center"><Square className="w-4 h-4 mr-1.5 text-primary" /> {property.areaSqMeters} m² Totales</span>
                 {hasParking && <span className="flex items-center"><ParkingCircle className="w-4 h-4 mr-1.5 text-primary" /> Estacionamiento</span>}
                 {hasBodega && <span className="flex items-center"><Archive className="w-4 h-4 mr-1.5 text-primary" /> Bodega</span>}
               </div>
+              {unitHighlights.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {unitHighlights.map(highlight => (
+                    <Badge key={highlight.label} variant="outline" className="border-sky-500 text-sky-700 bg-sky-100 dark:bg-sky-800/30 dark:text-sky-300 dark:border-sky-600 shadow-sm transition-all hover:shadow-md">
+                      <highlight.icon className="mr-1.5 h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      {highlight.label}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* Multimedia Gallery Section */}
             <section>
               {property.imageUrls && property.imageUrls.length > 0 && (
                 <div className="relative group">
-                  <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden shadow-md">
                     <Image
                       src={currentImageUrl}
                       alt={`${property.title} - imagen ${currentImageIndex + 1}`}
-                      fill // Changed from layout="fill" to fill
-                      style={{objectFit:"cover"}} // Changed from objectFit="cover"
+                      fill
+                      style={{objectFit:"cover"}}
                       priority
                       data-ai-hint="apartment interior stylish"
+                      className="transition-transform duration-500 ease-in-out group-hover:scale-105"
                     />
                   </AspectRatio>
                   {property.imageUrls.length > 1 && (
                     <>
-                      <Button onClick={prevImage} variant="outline" size="icon" className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white border-none shadow-md">
+                      <Button onClick={prevImage} variant="outline" size="icon" className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-none shadow-lg transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
                         <ChevronLeft className="h-6 w-6" />
                       </Button>
-                      <Button onClick={nextImage} variant="outline" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white border-none shadow-md">
+                      <Button onClick={nextImage} variant="outline" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-none shadow-lg transition-all duration-300 ease-in-out hover:scale-105 active:scale-95">
                         <ChevronRight className="h-6 w-6" />
                       </Button>
                     </>
                   )}
-                  <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-md shadow">
                     {currentImageIndex + 1} / {property.imageUrls.length}
                   </div>
                 </div>
               )}
               <div className="mt-4 flex gap-2 flex-wrap">
                 {property.virtualTourUrl && (
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="transition-all hover:shadow-md">
                     <a href={property.virtualTourUrl} target="_blank" rel="noopener noreferrer">
                       <Film className="mr-2 h-4 w-4" /> Tour Virtual 360°
                     </a>
                   </Button>
                 )}
-                <Button variant="outline" disabled>
+                <Button variant="outline" disabled className="transition-all hover:shadow-md">
                   <MapIcon className="mr-2 h-4 w-4" /> Ver Plano(s) (Próximamente)
                 </Button>
               </div>
@@ -359,10 +379,10 @@ export default function PropertyDetailsPage() {
             
             {/* Buttons for other units/typologies */}
             <div className="my-6 flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" disabled>
+                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm">
                     <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en {property.condominioName} (Próximamente)
                 </Button>
-                <Button variant="outline" size="sm" disabled>
+                <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm">
                     <Layers className="mr-2 h-4 w-4" /> Ver otras tipologías en {property.condominioName} (Próximamente)
                 </Button>
             </div>
@@ -422,10 +442,10 @@ export default function PropertyDetailsPage() {
             <Separator />
             <section>
               <h2 className="text-2xl font-semibold mb-3">Ubicación y Entorno</h2>
-              <Card>
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <AspectRatio ratio={16/9} className="bg-muted rounded-md flex items-center justify-center">
-                    <Image src="https://placehold.co/800x450.png?text=Mapa+Interactivo+Placeholder" alt="Mapa Placeholder" data-ai-hint="map location city" fill style={{objectFit:"cover"}} className="rounded-md opacity-70" />
+                    <Image src="https://placehold.co/800x450.png?text=Mapa+Interactivo+Placeholder" alt="Mapa Placeholder" data-ai-hint="map location city" fill style={{objectFit:"cover"}} className="rounded-md opacity-70 transition-opacity duration-300 hover:opacity-100" />
                     <p className="z-10 text-lg font-semibold text-background bg-black/50 p-2 rounded">Mapa (Integración futura)</p>
                   </AspectRatio>
                 </CardContent>
@@ -489,7 +509,7 @@ export default function PropertyDetailsPage() {
                 <Separator />
                 <Button
                   size="lg"
-                  className="w-full text-lg py-6"
+                  className="w-full text-lg py-6 transition-all hover:shadow-lg active:scale-95"
                   onClick={handleExpressInterest}
                   disabled={isExpressingInterest || property.status !== 'disponible'}
                 >
@@ -499,18 +519,18 @@ export default function PropertyDetailsPage() {
                 {property.status !== 'disponible' && (
                   <p className="text-center text-sm text-destructive mt-2">Esta propiedad no se encuentra disponible.</p>
                 )}
-                <Button variant="outline" size="lg" className="w-full" disabled>
+                <Button variant="outline" size="lg" className="w-full transition-all hover:shadow-md" disabled>
                   <Users className="mr-2 h-5 w-5" /> Contactar (Próximamente)
                 </Button>
                 <Separator />
                 <div className="text-center">
                   <p className="text-sm font-medium">Publicado por Hommie.cl Agente</p>
-                  <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100">
+                  <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100 shadow-sm">
                       <ShieldCheck className="mr-1.5 h-4 w-4 text-green-600 dark:text-green-100"/> Propiedad Verificada
                   </Badge>
                 </div>
                 <div className="flex justify-center space-x-2 mt-2">
-                    <Button variant="outline" size="icon" title="Compartir" disabled><Share2 className="h-5 w-5"/></Button>
+                    <Button variant="outline" size="icon" title="Compartir" disabled className="transition-all hover:shadow-sm"><Share2 className="h-5 w-5"/></Button>
                 </div>
               </CardContent>
             </Card>
@@ -524,10 +544,10 @@ export default function PropertyDetailsPage() {
           <Button
             variant="default"
             size="lg" 
-            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group" 
+            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 h-14 rounded-full shadow-lg z-[60] flex items-center space-x-2 pr-5 group transition-all duration-300 ease-in-out hover:scale-105" 
             aria-label="Abrir chat de IA"
           >
-            <CurrentFabIcon className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:scale-110" />
+            <CurrentFabIcon className="h-6 w-6 transition-transform duration-300 ease-in-out group-hover:rotate-12" />
             <span className="text-sm font-medium transition-all duration-300 ease-in-out opacity-100 max-w-[180px] truncate">
                 {motivationalMessages[currentFabMessageIndex]}
             </span>
@@ -537,7 +557,7 @@ export default function PropertyDetailsPage() {
           <SheetHeader className="p-4 border-b">
             <SheetTitle>Asistente de Arriendos IA</SheetTitle>
           </SheetHeader>
-          <div className="h-[calc(100%-4.5rem)]">
+          <div className="h-[calc(100%-4.5rem)]"> {/* Ensure AIChatClient can fill this */}
             <AIChatClient initialContextMessage={`Tengo una consulta sobre la propiedad: "${property.title}" (ID: ${property.propertyId}) ubicada en ${property.address.commune}.`} />
           </div>
         </SheetContent>
@@ -558,7 +578,7 @@ export default function PropertyDetailsPage() {
           </div>
           <Button
             size="default"
-            className="ml-2 sm:ml-4 whitespace-nowrap px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base"
+            className="ml-2 sm:ml-4 whitespace-nowrap px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base transition-all active:scale-95"
             onClick={handleExpressInterest}
             disabled={isExpressingInterest || property.status !== 'disponible'}
           >
