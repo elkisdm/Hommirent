@@ -14,7 +14,7 @@ export function MainNav({
 
   const routes = [
     { href: '/properties', label: 'Propiedades', public: true },
-    { href: '/chat', label: 'Asistente IA', public: true },
+    // { href: '/chat', label: 'Asistente IA', public: true }, // Removed this link
     { 
       href: userProfile?.role === 'propietario' ? '/dashboard/landlord' : (userProfile?.role === 'arrendatario' ? '/profile' : '/profile'), 
       label: 'Mi Panel', 
@@ -29,6 +29,9 @@ export function MainNav({
     >
       {routes.map((route) => {
         if (route.auth && !userProfile) return null;
+        // Hide "Mi Panel" if not logged in, even if it's technically public for profile
+        if (route.label === 'Mi Panel' && !userProfile) return null;
+        
         return (
           <Link
             key={route.href}

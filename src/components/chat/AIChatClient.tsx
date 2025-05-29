@@ -20,9 +20,10 @@ interface Message {
 
 interface AIChatClientProps {
   initialContextMessage?: string; // For specific property context
+  initialUserQuery?: string; // For starting chat from a full page input
 }
 
-export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
+export function AIChatClient({ initialContextMessage, initialUserQuery }: AIChatClientProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,25 +43,39 @@ export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
   }, [messages]);
   
   useEffect(() => {
-    // Initial greeting from AI
-    const greeting = { id: 'initial-greeting', sender: 'ai', text: '¡Hola! Soy tu asistente de arriendos Hommie AI. ¿Cómo puedo ayudarte a encontrar tu próximo hogar hoy?' };
-    if (initialContextMessage) {
-      setMessages([greeting]);
-      // Simulate user sending the context message to AI (or AI pre-filling it)
-      // This helps guide the AI for the first real user message
-      // We don't display this context message directly to user, but send it to AI
-      handleSendMessage(initialContextMessage, true);
-    } else {
-      setMessages([greeting]);
+    const initialMessages: Message[] = [];
+    let greetingText = '¡Hola! Soy tu asistente de arriendos Hommie AI. ¿Cómo puedo ayudarte a encontrar tu próximo hogar hoy?';
+    
+    if (initialUserQuery) {
+      // If there's an initial user query, AI response will come after processing it.
+      // No separate greeting needed before that first user message is processed.
+      greetingText = ''; // AI will respond to the initial query
+    } else if (initialContextMessage) {
+      // If there's context (e.g. property page chat), AI may use it.
+      // A general greeting might still be good.
     }
-  }, [initialContextMessage]);
+    
+    if (greetingText) {
+        initialMessages.push({ id: 'initial-greeting', sender: 'ai', text: greetingText });
+    }
+    
+    setMessages(initialMessages);
+
+    if (initialUserQuery) {
+      // Directly handle the initial user query
+      handleSendMessage(initialUserQuery, false, true);
+    } else if (initialContextMessage) {
+      // Handle context message if no initial user query
+      handleSendMessage(initialContextMessage, true);
+    }
+  }, [initialContextMessage, initialUserQuery]);
 
 
-  const handleSendMessage = async (messageToSend?: string, isContextMessage = false) => {
+  const handleSendMessage = async (messageToSend?: string, isContextMsg = false, isFirstUserQuery = false) => {
     const currentInput = messageToSend || input;
     if (currentInput.trim() === '') return;
 
-    if (!isContextMessage) {
+    if (!isContextMsg) {
       const userMessage: Message = { id: Date.now().toString(), sender: 'user', text: currentInput };
       setMessages((prevMessages) => [...prevMessages, userMessage]);
       setInput('');
@@ -73,13 +88,13 @@ export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
         location: location || undefined, 
         priceRange: priceRange || undefined,
         bedrooms: bedrooms || undefined,
-        propertyContext: isContextMessage ? undefined : initialContextMessage, // Pass context if it's a regular user message after context was set
+        propertyContext: isContextMsg ? currentInput : (initialContextMessage && !isFirstUserQuery ? initialContextMessage : undefined),
       };
       // If it is the context message itself, we pass it as propertyContext to prime the AI
-      if (isContextMessage) {
-        aiInput.propertyContext = currentInput;
+      if (isContextMsg) {
         aiInput.message = "El usuario está viendo la siguiente propiedad y podría tener preguntas al respecto. "; // Generic starter for AI
       }
+
 
       const aiResponse: RentalAssistantOutput = await rentalAssistantChat(aiInput);
       
@@ -105,7 +120,7 @@ export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card border-0 rounded-lg shadow-none"> {/* Adjusted for sheet */}
+    <div className="flex flex-col h-full bg-card border rounded-lg shadow-sm overflow-hidden"> {/* Adjusted for sheet & page */}
       <ScrollArea className="flex-1 p-4 space-y-4" ref={scrollAreaRef}>
         {messages.map((message) => (
           <div
@@ -120,7 +135,7 @@ export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
               </Avatar>
             )}
             <div
-              className={`max-w-xs lg:max-w-md p-3 rounded-lg ${
+              className={`max-w-xs lg:max-w-md p-3 rounded-lg shadow-sm ${
                 message.sender === 'user'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted'
@@ -149,18 +164,18 @@ export function AIChatClient({ initialContextMessage }: AIChatClientProps) {
             )}
           </div>
         ))}
-        {isLoading && (
+        {isLoading && messages.length > 0 && messages[messages.length-1].sender === 'user' && ( // Show spinner only if last message was user
           <div className="flex items-end space-x-2">
             <Avatar className="h-8 w-8">
               <AvatarFallback><Bot size={20} /></AvatarFallback>
             </Avatar>
-            <div className="max-w-xs lg:max-w-md p-3 rounded-lg bg-muted">
+            <div className="max-w-xs lg:max-w-md p-3 rounded-lg bg-muted shadow-sm">
               <Spinner size="small" />
             </div>
           </div>
         )}
       </ScrollArea>
-      <div className="p-4 border-t flex items-center space-x-2">
+      <div className="p-4 border-t flex items-center space-x-2 bg-background">
         <Input
           type="text"
           placeholder="Escribe tu mensaje..."
