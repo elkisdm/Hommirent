@@ -115,7 +115,6 @@ interface CondominioGroup {
   condominioName: string;
   typologies: TypologyGroup[];
   condominioImageUrls: string[];
-  condominioVideoUrl?: string;
   condominioAmenities: string[];
   condominioPromotions: Promotion[];
   address?: Property['address']; 
@@ -274,8 +273,6 @@ export default function PropertiesPage() {
             return getSortValue(a.typologyKey) - getSortValue(b.typologyKey);
           }),
           condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/600x400.png?text=${encodeURIComponent(condominioName)}`],
-          // Example video URL
-          condominioVideoUrl: condominioName.toLowerCase().includes("torres") ? 'https://www.youtube.com/embed/LXb3EKWsInQ' : undefined, 
           condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6), // Max 6 amenities
           // Example promotions
           condominioPromotions: condominioName.toLowerCase().includes("park") 
@@ -402,19 +399,6 @@ export default function PropertiesPage() {
                             />
                           </div>
                         ))}
-                      </div>
-                    )}
-                    {condominio.condominioVideoUrl && (
-                      <div className="relative aspect-video rounded-lg overflow-hidden mt-2 shadow-md">
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          src={condominio.condominioVideoUrl}
-                          title={`Video de ${condominio.condominioName}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="absolute top-0 left-0 w-full h-full border-0"
-                        ></iframe>
                       </div>
                     )}
                   </div>
