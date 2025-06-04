@@ -80,7 +80,7 @@ interface ScheduledVisitInfo {
   propertyTitle: string;
 }
 
-const WHATSAPP_CONTACT_NUMBER = '+56912345678'; // Placeholder, use your actual number
+const WHATSAPP_CONTACT_NUMBER = '+56993481594'; // Updated WhatsApp number
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -677,6 +677,8 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
+
+    
 
     
 
