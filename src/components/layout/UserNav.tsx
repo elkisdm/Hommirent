@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogIn, LogOut, User, Building, MessageSquare } from 'lucide-react';
+import { LogIn, LogOut, User, Building, MessageSquare, ShieldCheck } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export function UserNav() {
@@ -27,7 +27,7 @@ export function UserNav() {
     router.push('/'); 
   };
 
-  const showLoginSignupButtons = !currentUser && (pathname === '/' || pathname === '/properties');
+  const showLoginSignupButtons = !currentUser && (pathname === '/' || pathname === '/properties' || pathname.startsWith('/properties/'));
 
   if (showLoginSignupButtons) {
     return (
@@ -46,19 +46,8 @@ export function UserNav() {
   }
 
   if (!currentUser || !userProfile) {
-    // If not on homepage and not logged in, show nothing or a minimal login prompt
-    // For now, let's keep it clean and not show anything if not on homepage and not logged in.
-    // Alternatively, a single, less prominent login button could be shown.
-    // This depends on the desired UX for users landing on deep pages without auth.
-    // For this iteration, if not showLoginSignupButtons and no currentUser, it means user is on a non-home page and not logged in.
-    // We can show a single login button here if desired.
-    // Example:
-    // return (
-    //   <Button variant="outline" asChild>
-    //     <Link href={`/login?redirect=${pathname}`}>Iniciar Sesión</Link>
-    //   </Button>
-    // );
-    // For now, returning null if not on home and not logged in.
+    // For non-public, non-auth pages, if user is not logged in, they will be caught by page/layout protection.
+    // So, returning null here is fine if not on explicitly public unauthed pages.
     return null; 
   }
 
@@ -83,8 +72,8 @@ export function UserNav() {
             <p className="text-sm font-medium leading-none">
               {userProfile.displayName || userProfile.email}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {userProfile.role === 'propietario' ? 'Propietario' : 'Arrendatario'}
+            <p className="text-xs leading-none text-muted-foreground capitalize">
+              {userProfile.role.replace('_', ' ')}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -101,6 +90,14 @@ export function UserNav() {
               <Link href="/dashboard/landlord">
                 <Building className="mr-2 h-4 w-4" />
                 <span>Panel Propietario</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+          {userProfile.role === 'superadmin' && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin/dashboard">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>Panel Admin</span>
               </Link>
             </DropdownMenuItem>
           )}

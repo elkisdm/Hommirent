@@ -1,9 +1,11 @@
 import type { Timestamp, GeoPoint } from 'firebase/firestore';
 
+export type UserRole = 'arrendatario' | 'propietario' | 'superadmin'; // Added 'superadmin'
+
 export interface UserProfile {
   uid: string;
   email: string | null;
-  role: 'arrendatario' | 'propietario';
+  role: UserRole; // Updated to use the new UserRole type
   displayName?: string;
   createdAt: Timestamp;
 }
@@ -13,25 +15,25 @@ export interface Property {
   ownerUid: string;
   title: string;
   description: string;
-  condominioName: string; // Nuevo campo para el nombre del condominio
+  condominioName: string;
   address: {
     street: string;
-    number?: string; // Optional as some properties might not have a number or it's part of street
+    number?: string; 
     commune: string;
     city: string;
     region: string;
-    coordinates?: GeoPoint; // Optional for MVP
+    coordinates?: GeoPoint;
   };
   price: number;
-  currency: string; // Default "CLP"
+  currency: string; 
   bedrooms: number;
   bathrooms: number;
   areaSqMeters: number;
   amenities: string[];
   imageUrls: string[];
   mainImageUrl: string;
-  status: 'disponible' | 'arrendado' | 'en_revision'; // Default "disponible"
-  virtualTourUrl?: string; // Optional
+  status: 'disponible' | 'arrendado' | 'en_revision'; 
+  virtualTourUrl?: string; 
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -45,5 +47,3 @@ export interface Interest {
   status: 'pendiente' | 'contactado';
   createdAt: Timestamp;
 }
-
-export type UserRole = 'arrendatario' | 'propietario';

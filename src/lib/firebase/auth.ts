@@ -13,23 +13,24 @@ import type { UserProfile, UserRole } from '@/types';
 interface SignUpParams {
   email: string;
   password_RAW_VALUE_NEVER_LOG_THIS_OR_STORE_THIS_VARIABLE_except_in_memory: string;
-  role: UserRole;
+  role: 'arrendatario' | 'propietario'; // For public signup, superadmin is not an option
   displayName?: string;
 }
 
+// Note: The signUp function is for general user registration (arrendatario/propietario).
+// Superadmin role assignment would typically be a manual process or via a secure internal tool.
 export const signUp = async ({ email, password_RAW_VALUE_NEVER_LOG_THIS_OR_STORE_THIS_VARIABLE_except_in_memory, role, displayName }: SignUpParams): Promise<UserCredential> => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password_RAW_VALUE_NEVER_LOG_THIS_OR_STORE_THIS_VARIABLE_except_in_memory);
   const user = userCredential.user;
 
-  // Create user profile in Firestore
-  const userProfile: UserProfile = {
+  const userProfileData: UserProfile = {
     uid: user.uid,
     email: user.email,
-    role,
+    role, // Role from params
     displayName: displayName || user.email?.split('@')[0] || 'Usuario',
-    createdAt: serverTimestamp() as any, // Firestore will convert this
+    createdAt: serverTimestamp() as any, 
   };
-  await setDoc(doc(db, 'users', user.uid), userProfile);
+  await setDoc(doc(db, 'users', user.uid), userProfileData);
   
   return userCredential;
 };
@@ -55,6 +56,7 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
   const userDocRef = doc(db, 'users', uid);
   const userDocSnap = await getDoc(userDocRef);
   if (userDocSnap.exists()) {
+    // Explicitly cast to UserProfile to ensure role type is correct
     return userDocSnap.data() as UserProfile;
   }
   return null;
