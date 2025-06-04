@@ -80,6 +80,7 @@ interface ScheduledVisitInfo {
   propertyTitle: string;
 }
 
+const WHATSAPP_CONTACT_NUMBER = '+56912345678'; // Placeholder, use your actual number
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -298,6 +299,19 @@ export default function PropertyDetailsPage() {
     return icons[currentFabMessageIndex % icons.length];
   };
   const CurrentFabIcon = fabIcon();
+
+  const handleWhatsAppContact = () => {
+    if (!property) return;
+
+    const propertyDescription = property.title;
+    const addressInfo = `${property.address.street}, ${property.address.commune}`;
+    
+    const message = `Hola, solicito más detalles sobre la propiedad "${propertyDescription}" de tipología ${derivedTypology}, ubicada en ${addressInfo}. (ID: ${property.propertyId})`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_CONTACT_NUMBER}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
 
 
   return (
@@ -563,8 +577,13 @@ export default function PropertyDetailsPage() {
                 {property.status !== 'disponible' && !scheduledVisit && (
                   <p className="text-center text-sm text-destructive mt-2">Esta propiedad no se encuentra disponible.</p>
                 )}
-                <Button variant="outline" size="lg" className="w-full transition-all hover:shadow-md" disabled>
-                  <Users className="mr-2 h-5 w-5" /> Contactar (Próximamente)
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full transition-all hover:shadow-md"
+                  onClick={handleWhatsAppContact}
+                >
+                  <MessageSquare className="mr-2 h-5 w-5" /> Contactar por WhatsApp
                 </Button>
                 <Separator />
                 <div className="text-center">
