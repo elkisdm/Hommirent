@@ -13,90 +13,91 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
 import { getProperties } from '@/lib/firebase/firestore';
-import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight, Briefcase } from 'lucide-react';
+import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight, Briefcase, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Timestamp } from 'firebase/firestore';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import { Separator } from '@/components/ui/separator';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 // Mock data for now, replace with Firestore fetching
 const mockProperties: Property[] = [
   {
     propertyId: `prop-condo1-tip1-1`,
     ownerUid: `owner-1`,
-    title: `Unidad 101`, // Simplified title for row display
-    condominioName: 'Las Torres',
-    description: 'Acogedora unidad en primer piso, ideal para parejas.',
+    title: `Unidad 101 Elegante`, // Simplified title for row display
+    condominioName: 'Las Torres de Vitacura',
+    description: 'Acogedora unidad en primer piso, ideal para parejas, con terminaciones de lujo.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 500000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 60,
-    amenities: ['estacionamiento', 'bodega', 'conserjeria', 'piscina', 'gimnasio'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+2D1B+A`, `https://placehold.co/600x400.png?text=Torres+Living+A`, `https://placehold.co/600x400.png?text=Torres+Piscina`, `https://placehold.co/600x400.png?text=Torres+Gimnasio`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Torres+2D1B+A`,
+    amenities: ['estacionamiento', 'bodega', 'conserjeria', 'piscina', 'gimnasio equipado', 'salon gourmet'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Torres+2D1B+A`, `https://placehold.co/600x400.png?text=Torres+Living+A`, `https://placehold.co/600x400.png?text=Torres+Piscina`, `https://placehold.co/600x400.png?text=Torres+Gimnasio`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+2D1B+A`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
     propertyId: `prop-condo1-tip1-2`,
     ownerUid: `owner-2`,
-    title: `Unidad 201`,
-    condominioName: 'Las Torres',
-    description: 'Luminosa unidad con vista despejada. Moderno Estudio.',
+    title: `Estudio Moderno 201`,
+    condominioName: 'Las Torres de Vitacura',
+    description: 'Luminosa unidad con vista despejada. Moderno Estudio, perfecto para profesionales jovenes.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 380000, currency: 'CLP', bedrooms: 0, bathrooms: 1, areaSqMeters: 35,
-    amenities: ['estacionamiento', 'balcon', 'piscina'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Torres+Estudio+B`,
+    amenities: ['estacionamiento', 'balcon', 'piscina temperada', 'seguridad 24/7'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+Estudio+B`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
     propertyId: `prop-condo1-tip2-1`,
     ownerUid: `owner-3`,
-    title: `Unidad 305`,
-    condominioName: 'Las Torres',
-    description: 'Amplia unidad familiar con terraza.',
+    title: `Departamento Familiar 305`,
+    condominioName: 'Las Torres de Vitacura',
+    description: 'Amplia unidad familiar con terraza panorámica y excelente distribución interior.',
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 650000, currency: 'CLP', bedrooms: 3, bathrooms: 2, areaSqMeters: 85,
-    amenities: ['estacionamiento', 'bodega', 'piscina', 'terraza', 'gimnasio'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+3D2B+C`, `https://placehold.co/600x400.png?text=Torres+Dormitorio+C`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Torres+3D2B+C`,
+    amenities: ['estacionamiento', 'bodega', 'piscina', 'terraza', 'gimnasio', 'sala de juegos'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Torres+3D2B+C`, `https://placehold.co/600x400.png?text=Torres+Dormitorio+C`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+3D2B+C`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
     propertyId: `prop-condo2-tip1-1`,
     ownerUid: `owner-4`,
-    title: `Depto. 50A`,
-    condominioName: 'Central Park',
-    description: 'Moderno Loft perfecto para profesionales.',
+    title: `Loft Urbano 50A`,
+    condominioName: 'Central Park Residences',
+    description: 'Moderno Loft perfecto para profesionales, con acceso a metro y servicios.',
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 450000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 50,
-    amenities: ['gimnasio', 'sala multiuso', 'lavanderia', 'quincho'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Central+Loft+D`,
+    amenities: ['gimnasio', 'sala multiuso', 'lavanderia', 'quincho con vista', 'cowork'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Central+Loft+D`,
     status: 'arrendado', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
   {
     propertyId: `prop-condo2-tip2-1`,
     ownerUid: `owner-5`,
-    title: `Depto. 80C`,
-    condominioName: 'Central Park',
-    description: 'Departamento con excelente distribución y luz natural.',
+    title: `Departamento Ejecutivo 80C`,
+    condominioName: 'Central Park Residences',
+    description: 'Departamento con excelente distribución y luz natural, ideal para ejecutivos.',
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 580000, currency: 'CLP', bedrooms: 2, bathrooms: 2, areaSqMeters: 70,
-    amenities: ['estacionamiento', 'gimnasio', 'piscina', 'quincho', 'seguridad'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Central+2D2B+E`,
+    amenities: ['estacionamiento', 'gimnasio', 'piscina', 'quincho', 'seguridad', 'sala de cine'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Central+2D2B+E`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
    {
     propertyId: `prop-condo3-tip4-1`,
     ownerUid: `owner-6`,
-    title: `Casa Familiar Grande`,
-    condominioName: 'Valle Escondido',
-    description: 'Espaciosa casa en Las Condes con gran jardín.',
+    title: `Casa Familiar Grande con Jardín`,
+    condominioName: 'Valle Escondido Lo Curro',
+    description: 'Espaciosa casa en Las Condes con gran jardín privado y piscina, seguridad y tranquilidad.',
     address: { street: `Valle Escondido 700`, commune: 'Las Condes', city: 'Santiago', region: 'Metropolitana' },
     price: 1200000, currency: 'CLP', bedrooms: 4, bathrooms: 3, areaSqMeters: 220,
-    amenities: ['estacionamiento', 'jardin', 'piscina', 'seguridad'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`],
-    mainImageUrl: `https://placehold.co/600x400.png?text=Valle+4D3B+F`,
+    amenities: ['estacionamiento x2', 'jardin amplio', 'piscina privada', 'seguridad 24hrs', 'club house'],
+    imageUrls: [`https://placehold.co/800x600.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`],
+    mainImageUrl: `https://placehold.co/800x600.png?text=Valle+4D3B+F`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
 ];
@@ -110,6 +111,7 @@ interface TypologyGroup {
 interface Promotion {
   text: string;
   icon?: React.ElementType;
+  variant?: "default" | "secondary" | "outline" | "destructive";
 }
 
 interface CondominioGroup {
@@ -150,8 +152,8 @@ export default function PropertiesPage() {
   const getTypologyKey = (property: Property): string => `${property.bedrooms}D-${property.bathrooms}B`;
 
   const getAbbreviatedTypologyLabel = (bedrooms: number, bathrooms: number): string => {
-    const bedLabel = bedrooms === 0 ? "Estudio" : `${bedrooms}D`;
-    const bathLabel = `${bathrooms}B`;
+    const bedLabel = bedrooms === 0 ? "Estudio" : (bedrooms === 1 ? `${bedrooms} Dorm.` : `${bedrooms} Dorms.`);
+    const bathLabel = bathrooms === 1 ? `${bathrooms} Baño` : `${bathrooms} Baños`;
     return `${bedLabel} - ${bathLabel}`;
   };
 
@@ -165,15 +167,11 @@ export default function PropertiesPage() {
       setLoading(true);
       setLoadingFeatured(true);
       try {
-        // Fetch all properties (or a larger set for filtering)
-        // const mainProps = await getProperties({ status: 'disponible', count: 50 }); // Example: Fetch 50 for main list
-        const mainProps = mockProperties.filter(p => p.status === 'disponible'); // Using mock for now
+        const mainProps = mockProperties.filter(p => p.status === 'disponible');
         setAllProperties(mainProps);
 
-        // Fetch featured properties (a smaller, specific set)
-        // const featured = await getProperties({ status: 'disponible', count: 3 }); // Fetch 3 featured
-        const featured = mockProperties.filter(p => p.status === 'disponible').slice(0, 3);
-        setFeaturedProperties(featured);
+        const featured = mockProperties.filter(p => p.status === 'disponible' && p.price > 500000).slice(0, 3);
+        setFeaturedProperties(featured.length > 0 ? featured : mainProps.slice(0,3)); // Fallback if no "expensive" featured
 
       } catch (error) {
         console.error("Error fetching properties: ", error);
@@ -202,12 +200,12 @@ export default function PropertiesPage() {
     }
 
     if (bedroomsFilter) {
-      if (bedroomsFilter === "0") { // Estudio
+      if (bedroomsFilter === "0") {
         filtered = filtered.filter(p => p.bedrooms === 0);
-      } else if (bedroomsFilter === "4+") { // 4+ Dormitorios
+      } else if (bedroomsFilter === "4+") {
         filtered = filtered.filter(p => p.bedrooms >= 4);
-      } else if (bedroomsFilter === "loft") { // Loft (approximated as 1 bedroom for now)
-        filtered = filtered.filter(p => p.bedrooms === 1);
+      } else if (bedroomsFilter === "loft") { 
+        filtered = filtered.filter(p => p.bedrooms === 1 && (p.title.toLowerCase().includes('loft') || p.description.toLowerCase().includes('loft')));
       } else {
         const numBedrooms = parseInt(bedroomsFilter);
         if (!isNaN(numBedrooms)) {
@@ -238,7 +236,10 @@ export default function PropertiesPage() {
 
       const details = condominioDetailsMap.get(property.condominioName)!;
       if (property.mainImageUrl) details.images.add(property.mainImageUrl);
-      property.imageUrls.forEach(img => details.images.add(img));
+      // Only add a few more unique images to avoid too many thumbnails
+      for (let i=0; i < property.imageUrls.length && details.images.size < 4; i++) {
+         details.images.add(property.imageUrls[i]);
+      }
       property.amenities.forEach(am => details.amenities.add(am));
 
 
@@ -265,7 +266,7 @@ export default function PropertiesPage() {
 
       if (typologies.length > 0) {
         const condoDetails = condominioDetailsMap.get(condominioName)!;
-        const uniqueImageUrls = Array.from(condoDetails.images).slice(0, 4);
+        const uniqueImageUrls = Array.from(condoDetails.images);
 
         grouped.push({
           condominioName,
@@ -278,11 +279,11 @@ export default function PropertiesPage() {
             };
             return getSortValue(a.typologyKey) - getSortValue(b.typologyKey);
           }),
-          condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/600x400.png?text=${encodeURIComponent(condominioName)}`],
-          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6),
-          condominioPromotions: condominioName.toLowerCase().includes("park")
-            ? [{ text: "Primer mes 50% OFF", icon: Gift }, {text: "GGCC gratis x 3 meses", icon: Star}]
-            : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle}] : []),
+          condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/800x600.png?text=${encodeURIComponent(condominioName)}`],
+          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 5), // Show up to 5 amenities
+          condominioPromotions: condominioName.toLowerCase().includes("park") || condominioName.toLowerCase().includes("residences")
+            ? [{ text: "1er Mes con Descuento", icon: Gift, variant: "default" }, {text: "GGCC gratis x 3 meses", icon: Star, variant: "secondary"}]
+            : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle, variant: "outline"}] : []),
         });
       }
     });
@@ -290,11 +291,6 @@ export default function PropertiesPage() {
 
   }, [searchTerm, communeFilter, priceRangeFilter, bedroomsFilter, allProperties]);
 
-  const priceRanges = [
-    { label: 'Hasta $500.000', value: '0-500000'},
-    { label: '$500.001 - $800.000', value: '500001-800000'},
-    { label: 'Desde $800.001', value: '800001-999999999'},
-  ];
 
   if (loading && loadingFeatured && groupedProperties.length === 0 && featuredProperties.length === 0) {
     return (
@@ -306,53 +302,53 @@ export default function PropertiesPage() {
 
   return (
     <div className="space-y-12">
-      <div className="text-center pt-8">
+      <div className="text-center pt-8 pb-4">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-heading-foreground flex items-center justify-center">
           <Briefcase className="mr-3 h-10 w-10 text-primary" />
           Encuentra tu Próximo Hogar en Hommie.cl AI
         </h1>
-        <p className="mt-4 text-xl text-muted-foreground">
-          Explora nuestra selección de propiedades y descubre el lugar perfecto para ti.
+        <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto">
+          Explora nuestra cuidada selección de propiedades y descubre el lugar perfecto para ti, con la ayuda de nuestra IA.
         </p>
       </div>
 
-      <section>
-        <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Propiedades Destacadas</h2>
-        {loadingFeatured ? (
-          <div className="flex justify-center py-8"><Spinner /></div>
-        ) : featuredProperties.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loadingFeatured ? (
+         <div className="text-center py-8"><Spinner size="medium" /></div>
+      ) : featuredProperties.length > 0 && (
+        <section className="pb-4">
+          <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Propiedades Destacadas</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
             {featuredProperties.map((prop) => (
               <PropertyCard key={prop.propertyId} property={prop} />
             ))}
           </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-8">No hay propiedades destacadas en este momento.</p>
-        )}
-      </section>
-
-      <Separator className="my-10" />
+        </section>
+      )}
+      
+      <Separator className="my-8" />
 
       <section>
         <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Busca y Filtra Propiedades</h2>
-        <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-            <div className="space-y-1 lg:col-span-2">
-              <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Buscar</label>
+        <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30 sticky top-[calc(var(--header-height,64px)+1rem)] z-40"> {/* Adjust top based on header height */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div className="space-y-1 lg:col-span-1">
+              <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Palabra Clave</label>
               <Input
                   id="search"
                   placeholder="Proyecto, comuna, características..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-input/70"
               />
             </div>
             <div className="space-y-1">
               <label htmlFor="commune" className="text-sm font-medium text-muted-foreground">Comuna</label>
               <Select value={communeFilter} onValueChange={setCommuneFilter}>
-                <SelectTrigger id="commune">
+                <SelectTrigger id="commune" className="bg-input/70">
                   <SelectValue placeholder="Todas las comunas" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Todas las comunas</SelectItem>
                   {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -360,10 +356,11 @@ export default function PropertiesPage() {
             <div className="space-y-1">
               <label htmlFor="bedrooms" className="text-sm font-medium text-muted-foreground">Tipología</label>
               <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
-                <SelectTrigger id="bedrooms">
+                <SelectTrigger id="bedrooms" className="bg-input/70">
                   <SelectValue placeholder="Cualquier tipología" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Cualquier tipología</SelectItem>
                   <SelectItem value="0">Estudio</SelectItem>
                   <SelectItem value="1">1 Dormitorio</SelectItem>
                   <SelectItem value="2">2 Dormitorios</SelectItem>
@@ -374,76 +371,61 @@ export default function PropertiesPage() {
               </Select>
             </div>
             <Button
-              className="w-full md:w-auto"
-              onClick={() => {}}
+              className="w-full lg:w-auto text-base py-3 h-auto"
+              onClick={() => {/* Placeholder for potential explicit search action if needed */}}
+              size="lg"
             >
-              <Search className="mr-2 h-4 w-4" /> Aplicar Filtros
+              <Search className="mr-2 h-5 w-5" /> Aplicar Filtros
             </Button>
           </div>
         </div>
       </section>
 
-      {loading && !loadingFeatured ? <div className="flex justify-center py-8"><Spinner /></div> : null}
+      {loading && !loadingFeatured ? <div className="flex justify-center py-12"><Spinner size="large" /></div> : null}
 
       {!loading && groupedProperties.length === 0 && !loadingFeatured && (
-        <p className="text-center text-muted-foreground py-8">No se encontraron propiedades con los criterios seleccionados.</p>
+        <p className="text-center text-muted-foreground py-10 text-lg">No se encontraron propiedades con los criterios seleccionados.</p>
       )}
 
       {!loading && groupedProperties.length > 0 && (
-        <div className="space-y-6">
+        <div className="space-y-8 mt-10">
           {groupedProperties.map((condominio) => (
-            <Card key={condominio.condominioName} className="overflow-hidden shadow-lg rounded-xl border border-border/40">
-              <CardHeader className="p-4 md:p-6 bg-card/60">
-                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-                  <div className="w-full lg:w-2/5 space-y-2 flex-shrink-0">
-                    <div className="relative aspect-video rounded-lg overflow-hidden shadow-md group">
+            <Card key={condominio.condominioName} className="overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 rounded-xl border border-border/40">
+              <CardHeader className="p-0 md:p-0">
+                <div className="flex flex-col lg:flex-row">
+                  <div className="w-full lg:w-2/5 flex-shrink-0">
+                    <AspectRatio ratio={16 / 9} className="bg-muted rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none overflow-hidden">
                       <Image
                         src={condominio.condominioImageUrls[0]}
-                        alt={`Imagen principal de ${condominio.condominioName}`}
+                        alt={`Fachada de ${condominio.condominioName}`}
                         fill
                         style={{objectFit:"cover"}}
-                        data-ai-hint="apartment building exterior"
+                        data-ai-hint="modern apartment building"
                         priority
-                        className="transition-transform duration-300 ease-in-out group-hover:scale-105"
+                        className="transition-transform duration-500 ease-in-out hover:scale-105"
                       />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-75 group-hover:opacity-50 transition-opacity"></div>
-                    </div>
-                    {condominio.condominioImageUrls.length > 1 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {condominio.condominioImageUrls.slice(1, Math.min(4, condominio.condominioImageUrls.length)).map((url, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden shadow group">
-                            <Image
-                              src={url}
-                              alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`}
-                              fill
-                              style={{objectFit:"cover"}}
-                              data-ai-hint="building facade detail"
-                              className="transition-transform duration-300 ease-in-out group-hover:scale-105"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    </AspectRatio>
                   </div>
-                  <div className="w-full lg:w-3/5 space-y-3 mt-2 lg:mt-0">
-                    <CardTitle className="text-2xl md:text-3xl flex items-center font-bold text-heading-foreground">
-                      <Home className="mr-3 h-7 w-7 text-primary" />
-                      {condominio.condominioName}
+                  <div className="w-full lg:w-3/5 p-5 md:p-6 space-y-3">
+                    <CardTitle className="text-2xl md:text-3xl font-bold text-heading-foreground flex items-start">
+                      <Home className="mr-3 mt-1 h-7 w-7 text-primary flex-shrink-0" />
+                      <span>{condominio.condominioName}</span>
                     </CardTitle>
                     {condominio.address && (
-                        <CardDescription className="text-sm md:text-base text-muted-foreground">
-                            {condominio.address.street}{condominio.address.number ? `, ${condominio.address.number}` : ''}, {condominio.address.commune}, {condominio.address.city}
+                        <CardDescription className="text-sm md:text-base text-muted-foreground flex items-center">
+                            <MapPin className="mr-2 h-4 w-4 text-primary/80 flex-shrink-0" />
+                            {condominio.address.street}{condominio.address.number ? `, ${condominio.address.number}` : ''} - {condominio.address.commune}
                         </CardDescription>
                     )}
                     {condominio.condominioAmenities && condominio.condominioAmenities.length > 0 && (
                       <div className="pt-2">
-                        <h4 className="text-sm font-semibold mb-2 text-foreground/80">Comodidades Destacadas del Proyecto</h4>
+                        <h4 className="text-sm font-semibold mb-2 text-foreground/90">Comodidades Clave</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioAmenities.map((amenity, idx) => (
                             <Badge
                               key={idx}
                               variant="outline"
-                              className="border-teal-600 text-teal-600 bg-teal-500/10 hover:bg-teal-500/20 dark:border-teal-500 dark:text-teal-400 dark:bg-teal-500/10 dark:hover:bg-teal-500/20 shadow-sm"
+                              className="border-primary/50 text-primary/90 bg-primary/10 hover:bg-primary/20 shadow-sm text-xs"
                             >
                               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                               {amenity.charAt(0).toUpperCase() + amenity.slice(1)}
@@ -454,10 +436,10 @@ export default function PropertiesPage() {
                     )}
                     {condominio.condominioPromotions && condominio.condominioPromotions.length > 0 && (
                       <div className="pt-2">
-                        <h4 className="text-sm font-semibold mb-2 text-foreground/80">Promociones Vigentes</h4>
+                        <h4 className="text-sm font-semibold mb-2 text-foreground/90">Beneficios Exclusivos</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioPromotions.map((promo, idx) => (
-                            <Badge key={idx} variant="default" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm">
+                            <Badge key={idx} variant={promo.variant || "default"} className="shadow-sm text-xs">
                               {promo.icon && React.createElement(promo.icon, {className: "mr-1.5 h-3.5 w-3.5"})}
                               {promo.text}
                             </Badge>
@@ -467,46 +449,64 @@ export default function PropertiesPage() {
                     )}
                   </div>
                 </div>
+                 {condominio.condominioImageUrls.length > 1 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-3 gap-0.5 px-0.5 pb-0.5 lg:px-1 lg:pb-1 lg:gap-1 bg-card">
+                        {condominio.condominioImageUrls.slice(1, Math.min(4, condominio.condominioImageUrls.length)).map((url, idx) => (
+                        <div key={idx} className="relative group">
+                             <AspectRatio ratio={16/9} className="bg-muted overflow-hidden rounded-md">
+                                <Image
+                                    src={url}
+                                    alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`}
+                                    fill
+                                    style={{objectFit:"cover"}}
+                                    data-ai-hint="apartment interior luxury"
+                                    className="transition-transform duration-300 ease-in-out group-hover:scale-105"
+                                />
+                             </AspectRatio>
+                        </div>
+                        ))}
+                    </div>
+                )}
               </CardHeader>
-              <CardContent className="p-0 bg-background/90">
+              <CardContent className="p-0 bg-background/90 rounded-b-xl">
                 <Accordion type="multiple" className="w-full">
                   {condominio.typologies.map((typology) => (
                     <AccordionItem value={typology.typologyKey} key={typology.typologyKey} className="border-b border-border/20 last:border-b-0">
-                      <AccordionTrigger className="text-md font-medium hover:no-underline bg-muted/10 hover:bg-muted/20 dark:bg-muted/5 dark:hover:bg-muted/10 px-4 py-3 data-[state=open]:bg-muted/20 data-[state=open]:dark:bg-muted/10 transition-colors duration-150 ease-in-out data-[state=open]:rounded-b-none">
+                      <AccordionTrigger className="text-lg font-medium hover:no-underline bg-muted/20 hover:bg-muted/30 dark:bg-muted/10 dark:hover:bg-muted/20 px-5 py-4 data-[state=open]:bg-muted/30 data-[state=open]:dark:bg-muted/20 transition-colors duration-150 ease-in-out rounded-none data-[state=open]:border-b data-[state=open]:border-primary/30">
                         <div className="flex items-center w-full justify-between">
                             <div className="flex items-center">
-                            <BedDouble className="mr-2.5 h-5 w-5 text-primary" />
-                            <span className="text-primary">{typology.typologyName}</span>
-                            <span className="text-xs text-muted-foreground ml-2">({typology.units.length} unidad{typology.units.length !== 1 ? 'es' : ''})</span>
+                              <BedDouble className="mr-3 h-5 w-5 text-primary" />
+                              <span className="text-primary">{typology.typologyName}</span>
                             </div>
+                            <span className="text-sm text-muted-foreground ml-3">({typology.units.length} unidad{typology.units.length !== 1 ? 'es' : ''} disponible{typology.units.length !== 1 ? 's' : ''})</span>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="pt-0 pb-0 bg-background/95">
-                        <div className="divide-y divide-border/20">
+                      <AccordionContent className="pt-0 pb-0 bg-background/95 data-[state=open]:border-b data-[state=open]:border-border/10">
+                        <div className="divide-y divide-border/10">
                           {typology.units.map((unit) => (
-                            <div key={unit.propertyId} className="flex items-center justify-between py-4 px-4 hover:bg-muted/5 dark:hover:bg-muted/3 transition-colors duration-150 ease-in-out">
-                              <div className="flex-1 min-w-0 pr-3">
+                            <div key={unit.propertyId} className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 px-5 hover:bg-muted/10 dark:hover:bg-muted/5 transition-colors duration-150 ease-in-out">
+                              <div className="flex-1 min-w-0 pr-3 mb-3 sm:mb-0">
                                 <Link href={`/properties/${unit.propertyId}`} className="hover:underline focus:outline-none focus:ring-1 focus:ring-primary rounded-sm group">
                                   <h4 className="text-md font-semibold text-foreground group-hover:text-primary transition-colors">{unit.title}</h4>
                                 </Link>
-                                <p className="text-sm text-primary font-medium mt-0.5">{formatPrice(unit.price, unit.currency)}</p>
-                                <div className="flex items-center space-x-3 text-xs text-muted-foreground mt-1">
-                                  <span><Square className="inline h-3 w-3 mr-1 text-muted-foreground/80" />{unit.areaSqMeters} m²</span>
+                                <p className="text-lg text-primary font-medium mt-1">{formatPrice(unit.price, unit.currency)}</p>
+                                <div className="flex items-center space-x-3 text-sm text-muted-foreground mt-1.5">
+                                  <span><Square className="inline h-3.5 w-3.5 mr-1 text-muted-foreground/80" />{unit.areaSqMeters} m²</span>
                                   {unit.status === 'disponible' ? (
-                                    <Badge variant="outline" className="text-xs py-0 px-1.5 h-5 border-green-600 text-green-700 bg-green-500/15 dark:border-green-500 dark:text-green-400 dark:bg-green-500/20">Disponible</Badge>
+                                    <Badge variant="outline" className="text-xs py-0.5 px-2 h-auto border-green-600 text-green-700 bg-green-500/15 dark:border-green-500 dark:text-green-400 dark:bg-green-500/20">Disponible</Badge>
                                   ) : (
-                                    <Badge variant="secondary" className="text-xs py-0 px-1.5 h-5 bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/50">{unit.status.charAt(0).toUpperCase() + unit.status.slice(1)}</Badge>
+                                    <Badge variant="secondary" className="text-xs py-0.5 px-2 h-auto bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/50">{unit.status.charAt(0).toUpperCase() + unit.status.slice(1)}</Badge>
                                   )}
                                 </div>
                               </div>
                               <Button
                                 asChild
-                                variant="ghost"
-                                size="sm"
-                                className="ml-4 shrink-0 text-primary hover:bg-primary/10 hover:text-primary px-3 py-1.5 rounded-md"
+                                variant="outline"
+                                size="default"
+                                className="ml-auto sm:ml-4 shrink-0 text-primary hover:bg-primary/10 hover:text-primary border-primary/70 hover:border-primary px-6 py-2.5"
                               >
                                 <Link href={`/properties/${unit.propertyId}`}>
-                                  Ver Unidad <ChevronRight className="h-4 w-4 ml-1.5" />
+                                  Ver Unidad <ChevronRight className="h-4 w-4 ml-2" />
                                 </Link>
                               </Button>
                             </div>
