@@ -16,16 +16,18 @@ import {
   CalendarClock, Compass, Layers, RectangleHorizontal as WindowIcon, ChefHat, WashingMachine, Shirt, ThermometerSun, Wind, Palette, Building2, LayoutGrid, Snowflake, Heater,
   Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View, Lightbulb, MessageCircleQuestion,
 } from 'lucide-react';
-import type { Property, Interest } from '@/types';
-import { db, auth } from '@/lib/firebase/config';
-import { doc, getDoc, serverTimestamp, addDoc, collection, Timestamp } from 'firebase/firestore';
-import { useAuth } from '@/hooks/useAuth';
+import type { Property } from '@/types';
+// import { db } from '@/lib/firebase/config'; // Firebase imports commented out
+// import { doc, getDoc, serverTimestamp, addDoc, collection, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore'; // Keep for mock data type
+// import { useAuth } from '@/hooks/useAuth'; // No longer needed for this specific action
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { AIChatClient } from '@/components/chat/AIChatClient';
 import { FirstPaymentCalculator } from '@/components/properties/FirstPaymentCalculator';
+import { VisitRequestDialog } from '@/components/properties/VisitRequestDialog';
 
 
 // Mock data for a single property, replace with Firestore fetching
@@ -80,13 +82,13 @@ export default function PropertyDetailsPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isExpressingInterest, setIsExpressingInterest] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false); // Placeholder state
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentFabMessageIndex, setCurrentFabMessageIndex] = useState(0);
+  const [isVisitDialogOpen, setIsVisitDialogOpen] = useState(false);
 
 
-  const { currentUser, userProfile } = useAuth();
+  // const { currentUser, userProfile } = useAuth(); // Not needed for this action anymore
   const { toast } = useToast();
 
   useEffect(() => {
@@ -136,34 +138,12 @@ export default function PropertyDetailsPage() {
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + property.imageUrls.length) % property.imageUrls.length);
   };
 
-  const handleExpressInterest = async () => {
-    if (!currentUser || !userProfile) {
-      toast({ title: "Debes iniciar sesión", description: "Para expresar interés, por favor inicia sesión o regístrate.", variant: "destructive" });
-      router.push(`/login?redirect=/properties/${propertyId}`);
-      return;
+  const handleScheduleVisit = () => {
+    if (!property || property.status !== 'disponible') {
+        toast({ title: "No Disponible", description: "Esta propiedad no está disponible para visitas en este momento.", variant: "destructive"});
+        return;
     }
-    if (userProfile.role !== 'arrendatario') {
-      toast({ title: "Acción no permitida", description: "Solo los arrendatarios pueden expresar interés.", variant: "destructive" });
-      return;
-    }
-    if (!property) return;
-    setIsExpressingInterest(true);
-    try {
-      // const interestData: Omit<Interest, 'interestId' | 'createdAt'> = {
-      //   propertyId: property.propertyId,
-      //   tenantUid: currentUser.uid,
-      //   ownerUid: property.ownerUid,
-      //   status: 'pendiente',
-      // };
-      // await addDoc(collection(db, 'interests'), { ...interestData, createdAt: serverTimestamp() });
-      console.log("Interest expressed (simulated)");
-      toast({ title: "¡Interés expresado!", description: "El propietario ha sido notificado. (Simulado)" });
-    } catch (error) {
-      console.error("Error expressing interest:", error);
-      toast({ title: "Error", description: "No se pudo registrar tu interés.", variant: "destructive" });
-    } finally {
-      setIsExpressingInterest(false);
-    }
+    setIsVisitDialogOpen(true);
   };
 
   const toggleFavorite = () => setIsFavorite(!isFavorite);
@@ -511,10 +491,10 @@ export default function PropertyDetailsPage() {
                 <Button
                   size="lg"
                   className="w-full text-lg py-6 transition-all hover:shadow-lg active:scale-95"
-                  onClick={handleExpressInterest}
-                  disabled={isExpressingInterest || property.status !== 'disponible'}
+                  onClick={handleScheduleVisit}
+                  disabled={property.status !== 'disponible'}
                 >
-                  {isExpressingInterest ? <Spinner size="small" className="mr-2"/> : <CalendarDays className="mr-2 h-5 w-5" /> }
+                  <CalendarDays className="mr-2 h-5 w-5" />
                   {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
                 </Button>
                 {property.status !== 'disponible' && (
@@ -538,6 +518,15 @@ export default function PropertyDetailsPage() {
           </div>
         </div>
       </div>
+
+      {property && (
+        <VisitRequestDialog
+            open={isVisitDialogOpen}
+            onOpenChange={setIsVisitDialogOpen}
+            propertyId={property.propertyId}
+            propertyTitle={displayTitle}
+        />
+      )}
 
       {/* AI Chat FAB and Sheet */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
@@ -580,14 +569,10 @@ export default function PropertyDetailsPage() {
           <Button
             size="default"
             className="ml-2 sm:ml-4 whitespace-nowrap px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base transition-all active:scale-95"
-            onClick={handleExpressInterest}
-            disabled={isExpressingInterest || property.status !== 'disponible'}
+            onClick={handleScheduleVisit}
+            disabled={property.status !== 'disponible'}
           >
-            {isExpressingInterest ? (
-              <Spinner size="small" className="mr-0 sm:mr-2" />
-            ) : (
-              <CalendarDays className="mr-0 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-            )}
+            <CalendarDays className="mr-0 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             <span className="hidden sm:inline">
               {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
             </span>
@@ -601,3 +586,4 @@ export default function PropertyDetailsPage() {
   );
 }
 
+    
