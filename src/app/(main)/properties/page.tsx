@@ -9,11 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
 import { getProperties } from '@/lib/firebase/firestore';
-import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight, Briefcase, MapPin } from 'lucide-react';
+import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight, Briefcase, MapPin, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { Timestamp } from 'firebase/firestore';
 import { PropertyCard } from '@/components/properties/PropertyCard';
@@ -167,14 +167,19 @@ export default function PropertiesPage() {
       setLoading(true);
       setLoadingFeatured(true);
       try {
+        // Simulating API call for all properties (status 'disponible')
+        // const mainProps = await getProperties({ status: 'disponible' });
         const mainProps = mockProperties.filter(p => p.status === 'disponible');
         setAllProperties(mainProps);
 
+        // Simulating API call for featured properties (e.g., limit 3, or based on some criteria)
+        // const featured = await getProperties({ status: 'disponible', count: 3 });
         const featured = mockProperties.filter(p => p.status === 'disponible' && p.price > 500000).slice(0, 3);
         setFeaturedProperties(featured.length > 0 ? featured : mainProps.slice(0,3)); // Fallback if no "expensive" featured
 
       } catch (error) {
         console.error("Error fetching properties: ", error);
+        // TODO: Add user-facing error handling (e.g., toast notification)
       } finally {
         setLoading(false);
         setLoadingFeatured(false);
@@ -216,12 +221,12 @@ export default function PropertiesPage() {
 
     if (priceRangeFilter) {
       const [min, max] = priceRangeFilter.split('-').map(Number);
-      if (!isNaN(min) && !isNaN(max)) {
+      if (priceRangeFilter.endsWith('-')) { // Handles "2000000-"
+          if (!isNaN(min)) filtered = filtered.filter(p => p.price >= min);
+      } else if (!isNaN(min) && !isNaN(max)) {
         filtered = filtered.filter(p => p.price >= min && p.price <= max);
-      } else if (!isNaN(min)) {
+      } else if (!isNaN(min)) { // Should not happen if ranges are well defined
         filtered = filtered.filter(p => p.price >= min);
-      } else if (!isNaN(max)) {
-        filtered = filtered.filter(p => p.price <= max);
       }
     }
 
@@ -314,7 +319,7 @@ export default function PropertiesPage() {
 
       {loadingFeatured ? (
          <div className="text-center py-8"><Spinner size="medium" /></div>
-      ) : featuredProperties.length > 0 && (
+      ) : featuredProperties.length > 0 ? (
         <section className="pb-4">
           <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Propiedades Destacadas</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
@@ -323,6 +328,8 @@ export default function PropertiesPage() {
             ))}
           </div>
         </section>
+      ) : (
+        !loading && <p className="text-center text-muted-foreground py-6">No hay propiedades destacadas en este momento.</p>
       )}
       
       <Separator className="my-8" />
@@ -330,8 +337,8 @@ export default function PropertiesPage() {
       <section>
         <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Busca y Filtra Propiedades</h2>
         <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30 sticky top-[calc(var(--header-height,64px)+1rem)] z-40"> {/* Adjust top based on header height */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-            <div className="space-y-1 lg:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <div className="space-y-1 lg:col-span-2">
               <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Palabra Clave</label>
               <Input
                   id="search"
@@ -348,7 +355,7 @@ export default function PropertiesPage() {
                   <SelectValue placeholder="Todas las comunas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las comunas</SelectItem>
+                  
                   {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -360,7 +367,7 @@ export default function PropertiesPage() {
                   <SelectValue placeholder="Cualquier tipología" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Cualquier tipología</SelectItem>
+                  
                   <SelectItem value="0">Estudio</SelectItem>
                   <SelectItem value="1">1 Dormitorio</SelectItem>
                   <SelectItem value="2">2 Dormitorios</SelectItem>
@@ -370,13 +377,31 @@ export default function PropertiesPage() {
                 </SelectContent>
               </Select>
             </div>
+             <div className="space-y-1">
+              <label htmlFor="priceRange" className="text-sm font-medium text-muted-foreground">Rango de Precio</label>
+              <Select value={priceRangeFilter} onValueChange={setPriceRangeFilter}>
+                <SelectTrigger id="priceRange" className="bg-input/70">
+                  <SelectValue placeholder="Cualquier rango" />
+                </SelectTrigger>
+                <SelectContent>
+                  
+                  <SelectItem value="0-500000">$0 - $500.000</SelectItem>
+                  <SelectItem value="500000-800000">$500.000 - $800.000</SelectItem>
+                  <SelectItem value="800000-1200000">$800.000 - $1.200.000</SelectItem>
+                  <SelectItem value="1200000-2000000">$1.200.000 - $2.000.000</SelectItem>
+                  <SelectItem value="2000000-">+ $2.000.000</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* 
             <Button
               className="w-full lg:w-auto text-base py-3 h-auto"
-              onClick={() => {/* Placeholder for potential explicit search action if needed */}}
+              onClick={() => {}}
               size="lg"
             >
               <Search className="mr-2 h-5 w-5" /> Aplicar Filtros
             </Button>
+            */}
           </div>
         </div>
       </section>
@@ -475,7 +500,7 @@ export default function PropertiesPage() {
                       <AccordionTrigger className="text-lg font-medium hover:no-underline bg-muted/20 hover:bg-muted/30 dark:bg-muted/10 dark:hover:bg-muted/20 px-5 py-4 data-[state=open]:bg-muted/30 data-[state=open]:dark:bg-muted/20 transition-colors duration-150 ease-in-out rounded-none data-[state=open]:border-b data-[state=open]:border-primary/30">
                         <div className="flex items-center w-full justify-between">
                             <div className="flex items-center">
-                              <BedDouble className="mr-3 h-5 w-5 text-primary" />
+                              <Layers className="mr-3 h-5 w-5 text-primary" />
                               <span className="text-primary">{typology.typologyName}</span>
                             </div>
                             <span className="text-sm text-muted-foreground ml-3">({typology.units.length} unidad{typology.units.length !== 1 ? 'es' : ''} disponible{typology.units.length !== 1 ? 's' : ''})</span>
@@ -491,6 +516,7 @@ export default function PropertiesPage() {
                                 </Link>
                                 <p className="text-lg text-primary font-medium mt-1">{formatPrice(unit.price, unit.currency)}</p>
                                 <div className="flex items-center space-x-3 text-sm text-muted-foreground mt-1.5">
+                                  <span><BedDouble className="inline h-3.5 w-3.5 mr-1 text-muted-foreground/80" />{unit.bedrooms}D</span>
                                   <span><Square className="inline h-3.5 w-3.5 mr-1 text-muted-foreground/80" />{unit.areaSqMeters} m²</span>
                                   {unit.status === 'disponible' ? (
                                     <Badge variant="outline" className="text-xs py-0.5 px-2 h-auto border-green-600 text-green-700 bg-green-500/15 dark:border-green-500 dark:text-green-400 dark:bg-green-500/20">Disponible</Badge>
@@ -524,3 +550,4 @@ export default function PropertiesPage() {
     </div>
   );
 }
+
