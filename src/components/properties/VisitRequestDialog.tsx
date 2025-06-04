@@ -24,11 +24,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-// Popover is no longer needed for the main calendar
+// Calendar component is no longer directly used in the main UI for date picking
 import { cn } from '@/lib/utils';
-import { User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight, CalendarIcon as CalendarIconLucide } from 'lucide-react'; // Renamed CalendarIcon to avoid conflict
-import { format, getDay as getDayOfWeek, addDays } from 'date-fns';
+import { User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight } from 'lucide-react';
+import { format, getDay as getDayOfWeek, addDays, isSameDay, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Spinner } from '../ui/spinner';
@@ -110,6 +109,21 @@ const formatRutOnInput = (value: string): string => {
   return cleaned;
 };
 
+const generateSelectableDates = (daysToShow: number): Date[] => {
+  const dates: Date[] = [];
+  let currentDate = startOfDay(new Date());
+  let daysAdded = 0;
+
+  while (daysAdded < daysToShow) {
+    if (getDayOfWeek(currentDate) !== 0) { // Skip Sundays (0 is Sunday)
+      dates.push(currentDate);
+      daysAdded++;
+    }
+    currentDate = addDays(currentDate, 1);
+  }
+  return dates;
+};
+
 
 export function VisitRequestDialog({
   open,
@@ -122,6 +136,8 @@ export function VisitRequestDialog({
   const [currentStep, setCurrentStep] = useState(1);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const selectableDates = generateSelectableDates(14); // Generate 14 schedulable days
 
   const form = useForm<VisitRequestFormValues>({
     resolver: zodResolver(visitRequestSchema),
@@ -142,11 +158,11 @@ export function VisitRequestDialog({
   useEffect(() => {
     if (selectedDate) {
       setAvailableTimes(generateTimeSlots(selectedDate));
-      form.setValue('visitTime', '', {shouldValidate: false}); 
+      form.setValue('visitTime', '', {shouldValidate: currentStep === 2}); 
     } else {
       setAvailableTimes([]);
     }
-  }, [selectedDate, form]);
+  }, [selectedDate, form, currentStep]);
 
   const handleNextStep = async () => {
     let fieldsToValidate: (keyof VisitRequestFormValues)[] = [];
@@ -165,7 +181,15 @@ export function VisitRequestDialog({
   };
   
   const resetFormAndClose = () => {
-    form.reset();
+    form.reset({
+      firstName: '',
+      lastName: '',
+      rut: '',
+      email: '',
+      phone: '',
+      visitDate: undefined,
+      visitTime: '',
+    });
     setCurrentStep(1);
     setAvailableTimes([]);
     onOpenChange(false);
@@ -201,19 +225,15 @@ export function VisitRequestDialog({
     form.setValue('rut', formatted, { shouldValidate: true });
   };
 
-  const today = new Date();
-  const sevenDaysFromNow = addDays(today, 7);
-
-
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
         if (!isOpen) {
             resetFormAndClose();
         } else {
-            onOpenChange(true);
+            onOpenChange(true); // Ensure dialog opens if prop changes
         }
     }}>
-      <DialogContent className="sm:max-w-2xl"> {/* Adjusted max-width for side-by-side calendar */}
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl">Agendar Visita</DialogTitle>
           <DialogDescription>
@@ -227,127 +247,51 @@ export function VisitRequestDialog({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
               {currentStep === 1 && (
                 <>
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombre</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Ej: Juan" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Apellido</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Ej: Pérez" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="rut"
-                    render={({ field }) => ( 
-                      <FormItem>
-                        <FormLabel>RUT</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Fingerprint className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              placeholder="Ej: 12345678-9" 
-                              {...field} 
-                              onChange={handleRutInputChange} 
-                              value={field.value} 
-                              className="pl-10" 
-                              maxLength={10}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Número de Celular</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input type="tel" placeholder="Ej: +56912345678" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Correo Electrónico</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input type="email" placeholder="tu@email.com" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <FormField control={form.control} name="firstName" render={({ field }) => ( <FormItem> <FormLabel>Nombre</FormLabel> <FormControl> <div className="relative"> <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: Juan" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField control={form.control} name="lastName" render={({ field }) => ( <FormItem> <FormLabel>Apellido</FormLabel> <FormControl> <div className="relative"> <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: Pérez" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField control={form.control} name="rut" render={({ field }) => ( <FormItem> <FormLabel>RUT</FormLabel> <FormControl> <div className="relative"> <Fingerprint className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: 12345678-9" {...field} onChange={handleRutInputChange} value={field.value} className="pl-10" maxLength={10} /> </div> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Número de Celular</FormLabel> <FormControl> <div className="relative"> <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input type="tel" placeholder="Ej: +56912345678" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField control={form.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Correo Electrónico</FormLabel> <FormControl> <div className="relative"> <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input type="email" placeholder="tu@email.com" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
                 </>
               )}
 
               {currentStep === 2 && (
                 <div className="flex flex-col md:flex-row gap-6">
-                  <div className="md:w-1/2 lg:w-auto"> {/* Calendar column */}
+                  {/* Date Capsule Picker */}
+                  <div className="md:w-1/2 lg:w-2/5 space-y-3">
+                    <FormLabel className="block">Fecha de Visita</FormLabel>
+                     <div className="flex overflow-x-auto space-x-2 pb-2 custom-scrollbar-thin -ml-1 pl-1">
+                      {selectableDates.map((date) => (
+                        <Button
+                          key={date.toISOString()}
+                          type="button"
+                          variant={selectedDate && isSameDay(selectedDate, date) ? 'default' : 'outline'}
+                          onClick={() => {
+                            form.setValue('visitDate', date, { shouldValidate: true });
+                          }}
+                          className="flex flex-col items-center justify-center p-2.5 h-auto min-w-[64px] rounded-lg shadow-sm flex-shrink-0"
+                        >
+                          <span className="text-xs uppercase font-medium">
+                            {format(date, 'E', { locale: es })}
+                          </span>
+                          <span className="text-xl font-bold block my-0.5">
+                            {format(date, 'd', { locale: es })}
+                          </span>
+                          <span className="text-xs uppercase font-medium text-muted-foreground">
+                            {format(date, 'MMM', { locale: es })}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
                     <FormField
                       control={form.control}
                       name="visitDate"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col items-center md:items-start">
-                          <FormLabel className="mb-1 self-start">Fecha de Visita</FormLabel>
-                          <FormControl>
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => 
-                                date < new Date(new Date().setDate(today.getDate() -1)) || // past dates
-                                getDayOfWeek(date) === 0 || // Sunday
-                                date > sevenDaysFromNow // More than 7 days from now
-                              }
-                              initialFocus
-                              locale={es}
-                              className="rounded-md border shadow-sm bg-popover p-2" // Style calendar directly
-                            />
-                          </FormControl>
-                          <FormMessage className="mt-1 self-start" />
-                        </FormItem>
-                      )}
+                      render={() => ( <FormItem className="h-0 !mt-0 invisible"><FormMessage /></FormItem>)} // For error display
                     />
                   </div>
-
-                  <div className="flex-1 md:w-1/2 lg:flex-1"> {/* Time slots column */}
+                  
+                  {/* Time Slot Picker */}
+                  <div className="flex-1 md:w-1/2 lg:w-3/5">
                     {selectedDate ? (
                       <>
                         <FormLabel className="mb-2 block text-sm">
@@ -355,7 +299,7 @@ export function VisitRequestDialog({
                         </FormLabel>
                         <p className="text-xs text-muted-foreground mb-2">Horarios en zona horaria de Chile.</p>
                         {availableTimes.length > 0 ? (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto py-1 pr-1 custom-scrollbar">
+                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto py-1 pr-1 custom-scrollbar">
                             {availableTimes.map((time) => (
                               <Button
                                 key={time}
@@ -375,18 +319,14 @@ export function VisitRequestDialog({
                         )}
                       </>
                     ) : (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm p-4 border rounded-md bg-muted/50 min-h-[200px]">
-                        Selecciona una fecha del calendario para ver los horarios disponibles.
+                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm p-4 border rounded-md bg-muted/50 min-h-[150px] md:min-h-[200px]">
+                        Selecciona una fecha de la lista para ver los horarios disponibles.
                       </div>
                     )}
                      <FormField
                         control={form.control}
                         name="visitTime"
-                        render={() => (
-                            <FormItem className="h-0 !mt-0 invisible"> 
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                        render={() => ( <FormItem className="h-0 !mt-0 invisible"><FormMessage /></FormItem>)}
                     />
                   </div>
                 </div>
@@ -407,14 +347,14 @@ export function VisitRequestDialog({
                 type="button" 
                 onClick={handleNextStep} 
                 disabled={isLoading} 
-                className={currentStep === 1 ? 'w-full sm:w-auto ml-auto' : ''} 
+                className={cn(currentStep === 1 ? 'w-full sm:w-auto ml-auto' : '')}
             >
               Continuar
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
           {currentStep === 2 && (
-            <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isLoading || !selectedTime }>
+            <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isLoading || !selectedTime || !selectedDate }>
               {isLoading ? <Spinner size="small" className="mr-2" /> : <Send className="mr-2 h-4 w-4" />}
               Confirmar Visita
             </Button>
@@ -434,5 +374,3 @@ export function VisitRequestDialog({
     </Dialog>
   );
 }
-
-    
