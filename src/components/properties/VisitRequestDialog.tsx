@@ -63,10 +63,10 @@ const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
 
   if (day >= 1 && day <= 5) { // Monday to Friday
     startHour = 9;
-    endHour = 20;
+    endHour = 20; // Generates slots up to 19:00 - 20:00
   } else if (day === 6) { // Saturday
     startHour = 10;
-    endHour = 18;
+    endHour = 18; // Generates slots up to 17:00 - 18:00
   } else { // Sunday or invalid day
     return [];
   }
@@ -84,25 +84,33 @@ const formatRutOnInput = (value: string): string => {
   let cleaned = value.replace(/[^0-9kK]/gi, '').toUpperCase();
   if (cleaned.length === 0) return '';
 
+  let body = cleaned.slice(0, -1);
+  let verifier = cleaned.slice(-1);
+
   if (cleaned.length > 9) {
-    cleaned = cleaned.substring(0, 9);
+    body = cleaned.substring(0, cleaned.length -1);
+    verifier = cleaned.substring(cleaned.length-1);
   }
-
-  let body = cleaned;
-  let verifier = '';
-
-  if (cleaned.length > 1 && /^[0-9K]$/.test(cleaned.slice(-1))) {
-    body = cleaned.slice(0, -1);
-    verifier = cleaned.slice(-1);
-  } else if (cleaned.length > 8 && !/^[0-9K]$/.test(cleaned.slice(-1))) {
-    body = cleaned.substring(0,8);
+  
+  // Limit numeric part to 8 digits
+  if (body.length > 8) {
+    body = body.substring(0, 8);
+  }
+  
+  // If the "verifier" is not a valid verifier char, it's part of the body
+  if (!/^[0-9K]$/.test(verifier) && cleaned.length <= 8) {
+    body = cleaned;
     verifier = '';
+  } else if (!/^[0-9K]$/.test(verifier) && cleaned.length > 8) {
+     body = cleaned.substring(0,8);
+     verifier = ''; // Or slice from original cleaned if logic is different
   }
 
-  if (verifier) {
+
+  if (body.length > 0 && verifier) {
     return `${body}-${verifier}`;
   }
-  return body;
+  return cleaned; // Return 'cleaned' if no verifier yet or if it's just numbers
 };
 
 
@@ -116,7 +124,7 @@ export function VisitRequestDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false); // State for calendar popover
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<VisitRequestFormValues>({
@@ -149,6 +157,7 @@ export function VisitRequestDialog({
     if (currentStep === 1) {
       fieldsToValidate = ['firstName', 'lastName', 'rut', 'email', 'phone'];
     }
+    // No validation needed to move from step 2 to 3 if date/time are optional until final submit
     
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
@@ -179,6 +188,7 @@ export function VisitRequestDialog({
       visitTime: values.visitTime,
     });
 
+    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     toast({
@@ -204,14 +214,15 @@ export function VisitRequestDialog({
         if (!isOpen) {
             resetFormAndClose();
         } else {
-            onOpenChange(true); // Propagate open state change if dialog is explicitly opened
+            onOpenChange(true);
         }
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Agendar Visita (Paso {currentStep} de 2)</DialogTitle>
+          <DialogTitle className="text-2xl">Agendar Visita</DialogTitle>
           <DialogDescription>
-            Completa tus datos para visitar: <span className="font-semibold">{propertyTitle}</span>.
+            {currentStep === 1 && `Paso 1 de 2: Ingresa tus datos para visitar: "${propertyTitle}"`}
+            {currentStep === 2 && `Paso 2 de 2: Elige la fecha y hora para tu visita a: "${propertyTitle}"`}
           </DialogDescription>
         </DialogHeader>
         
@@ -267,6 +278,7 @@ export function VisitRequestDialog({
                               onChange={handleRutInputChange} 
                               value={field.value} 
                               className="pl-10" 
+                              maxLength={10}
                             />
                           </div>
                         </FormControl>
@@ -341,10 +353,8 @@ export function VisitRequestDialog({
                               mode="single"
                               selected={field.value}
                               onSelect={(date) => {
-                                if (date) {
-                                  field.onChange(date);
-                                  setIsCalendarOpen(false); // Close popover after date selection
-                                }
+                                field.onChange(date);
+                                if (date) setIsCalendarOpen(false);
                               }}
                               disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0} 
                               initialFocus
@@ -357,34 +367,40 @@ export function VisitRequestDialog({
                     )}
                   />
                   
-                  {selectedDate && availableTimes.length > 0 && (
+                  {selectedDate && (
                     <div className="mt-1">
-                      <FormLabel className="mb-2 block text-sm">Hora Disponible para {format(selectedDate, "PPP", { locale: es })}</FormLabel>
-                      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto py-1 pr-1">
-                        {availableTimes.map((time) => (
-                          <Button
-                            key={time}
-                            type="button"
-                            variant={selectedTime === time ? 'default' : 'outline'}
-                            onClick={() => {
-                              form.setValue('visitTime', time, { shouldValidate: true });
-                            }}
-                            className="w-full justify-center text-sm h-9"
-                          >
-                            {time.split(' - ')[0]} 
-                          </Button>
-                        ))}
-                      </div>
+                       <p className="text-xs text-muted-foreground mb-2 text-center">Horarios en zona horaria de Chile.</p>
+                      {availableTimes.length > 0 ? (
+                        <>
+                          <FormLabel className="mb-2 block text-sm">Hora Disponible para {format(selectedDate, "PPP", { locale: es })}</FormLabel>
+                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto py-1 pr-1">
+                            {availableTimes.map((time) => (
+                              <Button
+                                key={time}
+                                type="button"
+                                variant={selectedTime === time ? 'default' : 'outline'}
+                                onClick={() => {
+                                  form.setValue('visitTime', time, { shouldValidate: true });
+                                }}
+                                className="w-full justify-center text-sm h-9"
+                              >
+                                {time.split(' - ')[0]} 
+                              </Button>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para este día. Por favor, elige otra fecha.</p>
+                      )}
                     </div>
-                  )}
-                  {selectedDate && availableTimes.length === 0 && (
-                    <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para este día. Por favor, elige otra fecha.</p>
                   )}
                   <FormField
                       control={form.control}
                       name="visitTime"
                       render={() => (
-                          <FormItem className="h-0 !mt-0 invisible">
+                          // Hidden FormItem to ensure 'visitTime' validation message can be displayed if needed,
+                          // even though selection is done via buttons.
+                          <FormItem className="h-0 !mt-0 invisible"> 
                               <FormMessage />
                           </FormItem>
                       )}
@@ -409,14 +425,14 @@ export function VisitRequestDialog({
                 disabled={isLoading} 
                 className={currentStep === 1 ? 'w-full sm:w-auto ml-auto' : ''} 
             >
-              Siguiente
+              Continuar
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
           {currentStep === 2 && (
             <Button type="submit" onClick={form.handleSubmit(onSubmit)} disabled={isLoading || !selectedTime }>
               {isLoading ? <Spinner size="small" className="mr-2" /> : <Send className="mr-2 h-4 w-4" />}
-              Solicitar Visita
+              Confirmar Visita
             </Button>
           )}
           {currentStep === 1 && !isLoading && ( 
@@ -434,4 +450,3 @@ export function VisitRequestDialog({
     </Dialog>
   );
 }
-
