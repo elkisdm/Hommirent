@@ -26,9 +26,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-// Select is no longer needed for time
 import { cn } from '@/lib/utils';
-import { CalendarIcon, User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
+import { CalendarIcon, User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight } from 'lucide-react';
 import { format, getDay as getDayOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -75,7 +74,7 @@ const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
   for (let i = startHour; i < endHour; i++) {
     const startTime = `${String(i).padStart(2, '0')}:00`;
     const endTime = `${String(i + 1).padStart(2, '0')}:00`;
-    slots.push(`${startTime} - ${endTime}`); // Keep full slot for internal value
+    slots.push(`${startTime} - ${endTime}`);
   }
   return slots;
 };
@@ -88,7 +87,7 @@ export function VisitRequestDialog({
   onVisitSuccessfullyRequested,
 }: VisitRequestDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1); // Now 2 steps
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -111,7 +110,7 @@ export function VisitRequestDialog({
   useEffect(() => {
     if (selectedDate) {
       setAvailableTimes(generateTimeSlots(selectedDate));
-      form.setValue('visitTime', '', {shouldValidate: false}); // Reset time when date changes
+      form.setValue('visitTime', '', {shouldValidate: false});
     } else {
       setAvailableTimes([]);
     }
@@ -120,10 +119,9 @@ export function VisitRequestDialog({
   const handleNextStep = async () => {
     let fieldsToValidate: (keyof VisitRequestFormValues)[] = [];
     if (currentStep === 1) {
-      fieldsToValidate = ['firstName', 'lastName', 'rut'];
-    } else if (currentStep === 2) {
-      fieldsToValidate = ['email', 'phone'];
+      fieldsToValidate = ['firstName', 'lastName', 'rut', 'email', 'phone'];
     }
+    // No validation needed for step 2 before submission, as it's the final step handled by onSubmit
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
@@ -148,7 +146,7 @@ export function VisitRequestDialog({
       propertyId,
       propertyTitle,
       ...values,
-      visitDate: format(values.visitDate, "yyyy-MM-dd"), // Format for logging/API
+      visitDate: format(values.visitDate, "yyyy-MM-dd"),
       visitTime: values.visitTime,
     });
 
@@ -171,12 +169,12 @@ export function VisitRequestDialog({
         if (!isOpen) {
             resetFormAndClose();
         } else {
-            onOpenChange(true); // Ensure parent knows it's open
+            onOpenChange(true);
         }
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Agendar Visita (Paso {currentStep} de 3)</DialogTitle>
+          <DialogTitle className="text-2xl">Agendar Visita (Paso {currentStep} de 2)</DialogTitle>
           <DialogDescription>
             Completa tus datos para visitar: <span className="font-semibold">{propertyTitle}</span>.
           </DialogDescription>
@@ -233,11 +231,6 @@ export function VisitRequestDialog({
                     </FormItem>
                   )}
                 />
-              </>
-            )}
-
-            {currentStep === 2 && (
-              <>
                 <FormField
                   control={form.control}
                   name="phone"
@@ -273,7 +266,7 @@ export function VisitRequestDialog({
               </>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 2 && (
               <>
                 <FormField
                   control={form.control}
@@ -305,7 +298,7 @@ export function VisitRequestDialog({
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0} // Disable past dates and Sundays
+                            disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0}
                             initialFocus
                             locale={es}
                           />
@@ -330,7 +323,7 @@ export function VisitRequestDialog({
                           }}
                           className="w-full justify-center text-sm h-9"
                         >
-                          {time.split(' - ')[0]} {/* Show only start time */}
+                          {time.split(' - ')[0]}
                         </Button>
                       ))}
                     </div>
@@ -339,7 +332,6 @@ export function VisitRequestDialog({
                 {selectedDate && availableTimes.length === 0 && (
                    <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para esta fecha. Por favor, elige otro día.</p>
                 )}
-                {/* Hidden FormField for visitTime to show validation messages if needed */}
                  <FormField
                     control={form.control}
                     name="visitTime"
@@ -359,26 +351,25 @@ export function VisitRequestDialog({
                   Anterior
                 </Button>
               )}
-              {currentStep < 3 && (
+              {currentStep < 2 && ( // Changed from currentStep < 3
                 <Button type="button" onClick={handleNextStep} disabled={isLoading} className={currentStep === 1 ? 'w-full' : ''}>
                   Siguiente
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               )}
-              {currentStep === 3 && (
+              {currentStep === 2 && ( // Changed from currentStep === 3
                 <Button type="submit" disabled={isLoading || !selectedTime }>
                   {isLoading ? <Spinner size="small" className="mr-2" /> : <Send className="mr-2 h-4 w-4" />}
                   Solicitar Visita
                 </Button>
               )}
-              {/* Keep Cancel button or a placeholder for consistent layout if only one button is shown */}
               {currentStep === 1 && ( 
                  <DialogClose asChild>
                     <Button type="button" variant="ghost" className="invisible w-0 p-0 md:visible md:w-auto md:px-4 md:py-2">Cancelar</Button>
                  </DialogClose>
               )}
             </DialogFooter>
-             {currentStep === 1 && ( // Mobile specific cancel button
+             {currentStep === 1 && (
                 <DialogClose asChild>
                    <Button type="button" variant="outline" className="w-full md:hidden mt-2">Cancelar</Button>
                 </DialogClose>
@@ -389,6 +380,3 @@ export function VisitRequestDialog({
     </Dialog>
   );
 }
-
-
-    
