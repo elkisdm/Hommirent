@@ -26,7 +26,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Select is no longer needed for time
 import { cn } from '@/lib/utils';
 import { CalendarIcon, User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { format, getDay as getDayOfWeek } from 'date-fns';
@@ -51,6 +51,7 @@ interface VisitRequestDialogProps {
   onOpenChange: (open: boolean) => void;
   propertyId: string;
   propertyTitle: string;
+  onVisitSuccessfullyRequested?: (details: { date: Date; time: string }) => void;
 }
 
 const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
@@ -74,7 +75,7 @@ const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
   for (let i = startHour; i < endHour; i++) {
     const startTime = `${String(i).padStart(2, '0')}:00`;
     const endTime = `${String(i + 1).padStart(2, '0')}:00`;
-    slots.push(`${startTime} - ${endTime}`);
+    slots.push(`${startTime} - ${endTime}`); // Keep full slot for internal value
   }
   return slots;
 };
@@ -84,6 +85,7 @@ export function VisitRequestDialog({
   onOpenChange,
   propertyId,
   propertyTitle,
+  onVisitSuccessfullyRequested,
 }: VisitRequestDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -104,11 +106,12 @@ export function VisitRequestDialog({
   });
 
   const selectedDate = form.watch('visitDate');
+  const selectedTime = form.watch('visitTime');
 
   useEffect(() => {
     if (selectedDate) {
       setAvailableTimes(generateTimeSlots(selectedDate));
-      form.setValue('visitTime', ''); // Reset time when date changes
+      form.setValue('visitTime', '', {shouldValidate: false}); // Reset time when date changes
     } else {
       setAvailableTimes([]);
     }
@@ -135,6 +138,7 @@ export function VisitRequestDialog({
   const resetFormAndClose = () => {
     form.reset();
     setCurrentStep(1);
+    setAvailableTimes([]);
     onOpenChange(false);
   }
 
@@ -144,17 +148,20 @@ export function VisitRequestDialog({
       propertyId,
       propertyTitle,
       ...values,
-      visitDate: format(values.visitDate, "yyyy-MM-dd"),
+      visitDate: format(values.visitDate, "yyyy-MM-dd"), // Format for logging/API
       visitTime: values.visitTime,
     });
 
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     toast({
       title: 'Solicitud de Visita Enviada',
-      description: `Hemos recibido tu solicitud para visitar "${propertyTitle}" el ${format(values.visitDate, "PPP", {locale: es})} a las ${values.visitTime}. Nos pondremos en contacto. (Simulado)`,
+      description: `Hemos recibido tu solicitud para visitar "${propertyTitle}" el ${format(values.visitDate, "PPP", {locale: es})} a las ${values.visitTime.split(" - ")[0]}. Nos pondremos en contacto. (Simulado)`,
     });
+    
+    if (onVisitSuccessfullyRequested) {
+        onVisitSuccessfullyRequested({date: values.visitDate, time: values.visitTime});
+    }
     setIsLoading(false);
     resetFormAndClose();
   }
@@ -164,7 +171,7 @@ export function VisitRequestDialog({
         if (!isOpen) {
             resetFormAndClose();
         } else {
-            onOpenChange(true);
+            onOpenChange(true); // Ensure parent knows it's open
         }
     }}>
       <DialogContent className="sm:max-w-md">
@@ -308,36 +315,39 @@ export function VisitRequestDialog({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="visitTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hora de Visita</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={availableTimes.length === 0}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <SelectValue placeholder="Selecciona una hora" className="pl-10" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {availableTimes.length > 0 ? (
-                            availableTimes.map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-slots" disabled>
-                              No hay horarios disponibles para esta fecha.
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                
+                {selectedDate && availableTimes.length > 0 && (
+                  <div className="mt-1">
+                    <FormLabel className="mb-2 block text-sm">Hora Disponible para {format(selectedDate, "PPP", { locale: es })}</FormLabel>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto py-1 pr-1">
+                      {availableTimes.map((time) => (
+                        <Button
+                          key={time}
+                          type="button"
+                          variant={selectedTime === time ? 'default' : 'outline'}
+                          onClick={() => {
+                            form.setValue('visitTime', time, { shouldValidate: true });
+                          }}
+                          className="w-full justify-center text-sm h-9"
+                        >
+                          {time.split(' - ')[0]} {/* Show only start time */}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selectedDate && availableTimes.length === 0 && (
+                   <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para esta fecha. Por favor, elige otro día.</p>
+                )}
+                {/* Hidden FormField for visitTime to show validation messages if needed */}
+                 <FormField
+                    control={form.control}
+                    name="visitTime"
+                    render={() => (
+                        <FormItem className="h-0 !mt-0 invisible">
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
               </>
             )}
@@ -356,18 +366,19 @@ export function VisitRequestDialog({
                 </Button>
               )}
               {currentStep === 3 && (
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading || !selectedTime }>
                   {isLoading ? <Spinner size="small" className="mr-2" /> : <Send className="mr-2 h-4 w-4" />}
                   Solicitar Visita
                 </Button>
               )}
-              {currentStep === 1 && ( // Placeholder for Cancel button to maintain layout
-                <DialogClose asChild>
-                   <Button type="button" variant="ghost" className="invisible w-0 p-0 md:visible md:w-auto md:px-4 md:py-2">Cancelar</Button>
-                </DialogClose>
+              {/* Keep Cancel button or a placeholder for consistent layout if only one button is shown */}
+              {currentStep === 1 && ( 
+                 <DialogClose asChild>
+                    <Button type="button" variant="ghost" className="invisible w-0 p-0 md:visible md:w-auto md:px-4 md:py-2">Cancelar</Button>
+                 </DialogClose>
               )}
             </DialogFooter>
-             {currentStep === 1 && (
+             {currentStep === 1 && ( // Mobile specific cancel button
                 <DialogClose asChild>
                    <Button type="button" variant="outline" className="w-full md:hidden mt-2">Cancelar</Button>
                 </DialogClose>
@@ -379,3 +390,5 @@ export function VisitRequestDialog({
   );
 }
 
+
+    

@@ -17,10 +17,7 @@ import {
   Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View, Lightbulb, MessageCircleQuestion,
 } from 'lucide-react';
 import type { Property } from '@/types';
-// import { db } from '@/lib/firebase/config'; // Firebase imports commented out
-// import { doc, getDoc, serverTimestamp, addDoc, collection, Timestamp } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore'; // Keep for mock data type
-// import { useAuth } from '@/hooks/useAuth'; // No longer needed for this specific action
+import { Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -28,6 +25,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { AIChatClient } from '@/components/chat/AIChatClient';
 import { FirstPaymentCalculator } from '@/components/properties/FirstPaymentCalculator';
 import { VisitRequestDialog } from '@/components/properties/VisitRequestDialog';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 
 // Mock data for a single property, replace with Firestore fetching
@@ -74,6 +73,13 @@ const motivationalMessages = [
   "¿Qué te parece esta comuna?",
 ];
 
+const LOCAL_STORAGE_SCHEDULED_VISITS_KEY = 'hommieScheduledVisits';
+interface ScheduledVisitInfo {
+  date: string; // ISO string
+  time: string;
+  propertyTitle: string;
+}
+
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -86,9 +92,9 @@ export default function PropertyDetailsPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentFabMessageIndex, setCurrentFabMessageIndex] = useState(0);
   const [isVisitDialogOpen, setIsVisitDialogOpen] = useState(false);
+  const [scheduledVisit, setScheduledVisit] = useState<ScheduledVisitInfo | null>(null);
 
 
-  // const { currentUser, userProfile } = useAuth(); // Not needed for this action anymore
   const { toast } = useToast();
 
   useEffect(() => {
@@ -104,14 +110,6 @@ export default function PropertyDetailsPage() {
     const fetchProperty = async () => {
       setLoading(true);
       try {
-        // const propertyDocRef = doc(db, 'properties', propertyId);
-        // const propertyDoc = await getDoc(propertyDocRef);
-        // if (propertyDoc.exists()) {
-        //   setProperty({ propertyId: propertyDoc.id, ...propertyDoc.data() } as Property);
-        // } else {
-        //   toast({ title: "Error", description: "Propiedad no encontrada.", variant: "destructive" });
-        //   router.push('/properties');
-        // }
         setProperty(mockProperty); // Using mock data for now
       } catch (error) {
         console.error("Error fetching property: ", error);
@@ -122,9 +120,29 @@ export default function PropertyDetailsPage() {
     };
 
     fetchProperty();
+
+    // Load scheduled visit from LocalStorage
+    const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+    if (storedVisitsRaw) {
+      try {
+        const storedVisits = JSON.parse(storedVisitsRaw);
+        if (storedVisits[propertyId]) {
+          setScheduledVisit(storedVisits[propertyId]);
+        } else {
+          setScheduledVisit(null);
+        }
+      } catch (e) {
+        console.error("Error parsing scheduled visits from localStorage", e);
+        setScheduledVisit(null);
+        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY); // Clear corrupted data
+      }
+    } else {
+      setScheduledVisit(null);
+    }
+
   }, [propertyId, router, toast]);
 
-  const formatPrice = (price: number, currency: string) => {
+  const formatPriceDisplay = (price: number, currency: string) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: currency }).format(price);
   };
 
@@ -138,13 +156,33 @@ export default function PropertyDetailsPage() {
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + property.imageUrls.length) % property.imageUrls.length);
   };
 
-  const handleScheduleVisit = () => {
+  const handleOpenScheduleVisitDialog = () => {
     if (!property || property.status !== 'disponible') {
         toast({ title: "No Disponible", description: "Esta propiedad no está disponible para visitas en este momento.", variant: "destructive"});
         return;
     }
     setIsVisitDialogOpen(true);
   };
+
+  const handleVisitSuccessfullyRequested = (details: { date: Date; time: string }) => {
+    if (!property) return;
+
+    const displayTitle = `Dpto N° ${getUnitIdentifier(property.address.number)} ${property.condominioName} - ${property.bedrooms}D-${property.bathrooms}B`;
+    const newVisit: ScheduledVisitInfo = {
+      date: details.date.toISOString(),
+      time: details.time,
+      propertyTitle: displayTitle,
+    };
+
+    const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+    const storedVisits = storedVisitsRaw ? JSON.parse(storedVisitsRaw) : {};
+    storedVisits[property.propertyId] = newVisit;
+    localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+
+    setScheduledVisit(newVisit);
+    setIsVisitDialogOpen(false); // Dialog will also call its onOpenChange(false)
+  };
+
 
   const toggleFavorite = () => setIsFavorite(!isFavorite);
 
@@ -161,21 +199,22 @@ export default function PropertyDetailsPage() {
     </div>;
   }
 
+  const getUnitIdentifier = (addressNumber?: string) => {
+    if (addressNumber) {
+      const parts = addressNumber.split(' ');
+      if (parts.length > 1 && (parts[0].toLowerCase() === 'depto' || parts[0].toLowerCase() === 'oficina' || parts[0].toLowerCase() === 'casa' || parts[0].toLowerCase() === 'unidad')) {
+        return parts.slice(1).join(' ');
+      }
+      return addressNumber;
+    }
+    return 'N/E';
+  };
+
   const currentImageUrl = property.imageUrls[currentImageIndex] || property.mainImageUrl;
   const hasParking = property.amenities.some(a => a.toLowerCase().includes('estacionamiento'));
   const hasBodega = property.amenities.some(a => a.toLowerCase().includes('bodega'));
   const derivedTypology = `${property.bedrooms}D-${property.bathrooms}B`;
-
-  let unitIdentifier = property.address.number;
-  if (unitIdentifier) {
-      const parts = unitIdentifier.split(' ');
-      if (parts.length > 1 && (parts[0].toLowerCase() === 'depto' || parts[0].toLowerCase() === 'oficina' || parts[0].toLowerCase() === 'casa' || parts[0].toLowerCase() === 'unidad')) {
-          unitIdentifier = parts.slice(1).join(' ');
-      }
-  } else {
-      unitIdentifier = 'N/E'; // No especificado
-  }
-  const displayTitle = `Dpto N° ${unitIdentifier} ${property.condominioName} - ${derivedTypology}`;
+  const displayTitle = `Dpto N° ${getUnitIdentifier(property.address.number)} ${property.condominioName} - ${derivedTypology}`;
 
 
   const mockData = { // These would ideally come from property object if schema extended
@@ -451,8 +490,8 @@ export default function PropertyDetailsPage() {
                 <Card>
                   <CardHeader><CardTitle className="text-xl">Resumen de Costos Iniciales</CardTitle></CardHeader>
                   <CardContent className="space-y-1 text-muted-foreground">
-                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de arriendo: {formatPrice(property.price, property.currency)}</p>
-                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de garantía: {formatPrice(property.price, property.currency)} (1 mes)</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de arriendo: {formatPriceDisplay(property.price, property.currency)}</p>
+                    <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Mes de garantía: {formatPriceDisplay(property.price, property.currency)} (1 mes)</p>
                     <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Comisión: {mockData.comisionArrendatario}</p>
                     <p className="flex items-start"><Wallet className="inline w-4 h-4 mr-1.5 text-primary mt-0.5 shrink-0" /> Gastos notariales: Aprox. $25.000 CLP (Referencial)</p>
                   </CardContent>
@@ -480,24 +519,48 @@ export default function PropertyDetailsPage() {
             <Card className="shadow-lg">
               <CardContent className="p-6 space-y-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-primary">{formatPrice(property.price, property.currency)}</p>
+                  <p className="text-3xl font-bold text-primary">{formatPriceDisplay(property.price, property.currency)}</p>
                   <p className="text-sm text-muted-foreground">/ Mes</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-md">Gastos Comunes: {formatPrice(mockData.gastosComunesAprox, property.currency)} aprox.</p>
+                  <p className="font-semibold text-md">Gastos Comunes: {formatPriceDisplay(mockData.gastosComunesAprox, property.currency)} aprox.</p>
                   <p className="text-xs text-muted-foreground">({mockData.incluyeEnGastosComunes})</p>
                 </div>
                 <Separator />
-                <Button
-                  size="lg"
-                  className="w-full text-lg py-6 transition-all hover:shadow-lg active:scale-95"
-                  onClick={handleScheduleVisit}
-                  disabled={property.status !== 'disponible'}
-                >
-                  <CalendarDays className="mr-2 h-5 w-5" />
-                  {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
-                </Button>
-                {property.status !== 'disponible' && (
+
+                {scheduledVisit ? (
+                  <Card className="mt-0 p-0 bg-muted/70 border-primary/50 shadow-sm">
+                    <CardHeader className="pb-2 pt-4">
+                      <CardTitle className="text-lg flex items-center text-heading-foreground">
+                        <CheckCircle className="w-5 h-5 mr-2 text-green-500" /> Visita Agendada
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-1 pt-0 pb-4">
+                      <p className="text-muted-foreground">Para: <span className="font-medium text-foreground">{scheduledVisit.propertyTitle}</span></p>
+                      <p className="text-muted-foreground">Fecha: <span className="font-medium text-foreground">{format(new Date(scheduledVisit.date), "EEEE dd 'de' MMMM, yyyy", { locale: es })}</span></p>
+                      <p className="text-muted-foreground">Hora: <span className="font-medium text-foreground">{scheduledVisit.time}</span></p>
+                      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => {
+                        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY); // Example: clear all for now
+                        setScheduledVisit(null);
+                        toast({title: "Visita cancelada (simulado)", description: "Puedes agendar una nueva visita."})
+                         }}>
+                        Cancelar Visita (Simulado)
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="w-full text-lg py-6 transition-all hover:shadow-lg active:scale-95"
+                    onClick={handleOpenScheduleVisitDialog}
+                    disabled={property.status !== 'disponible'}
+                  >
+                    <CalendarDays className="mr-2 h-5 w-5" />
+                    {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
+                  </Button>
+                )}
+
+                {property.status !== 'disponible' && !scheduledVisit && (
                   <p className="text-center text-sm text-destructive mt-2">Esta propiedad no se encuentra disponible.</p>
                 )}
                 <Button variant="outline" size="lg" className="w-full transition-all hover:shadow-md" disabled>
@@ -525,6 +588,7 @@ export default function PropertyDetailsPage() {
             onOpenChange={setIsVisitDialogOpen}
             propertyId={property.propertyId}
             propertyTitle={displayTitle}
+            onVisitSuccessfullyRequested={handleVisitSuccessfullyRequested}
         />
       )}
 
@@ -562,28 +626,39 @@ export default function PropertyDetailsPage() {
               {displayTitle}
             </h3>
             <p className="text-md sm:text-lg font-bold text-primary">
-              {formatPrice(property.price, property.currency)}
+              {formatPriceDisplay(property.price, property.currency)}
               <span className="text-xs text-muted-foreground"> / Mes</span>
             </p>
           </div>
-          <Button
-            size="default"
-            className="ml-2 sm:ml-4 whitespace-nowrap px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base transition-all active:scale-95"
-            onClick={handleScheduleVisit}
-            disabled={property.status !== 'disponible'}
-          >
-            <CalendarDays className="mr-0 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="hidden sm:inline">
-              {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
-            </span>
-             <span className="sm:hidden">
-              {property.status === 'disponible' ? 'Agendar' : 'No Disp.'}
-            </span>
-          </Button>
+          {scheduledVisit ? (
+             <div className="ml-2 sm:ml-4 text-center">
+                <p className="text-xs text-green-600 dark:text-green-400 font-semibold flex items-center">
+                    <CheckCircle className="w-3 h-3 mr-1"/> Agendada
+                </p>
+                <p className="text-[10px] text-muted-foreground">{format(new Date(scheduledVisit.date), "dd MMM", { locale: es })} - {scheduledVisit.time.split(" - ")[0]}</p>
+             </div>
+          ) : (
+            <Button
+                size="default"
+                className="ml-2 sm:ml-4 whitespace-nowrap px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base transition-all active:scale-95"
+                onClick={handleOpenScheduleVisitDialog}
+                disabled={property.status !== 'disponible'}
+            >
+                <CalendarDays className="mr-0 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">
+                {property.status === 'disponible' ? 'Agendar Visita' : 'No Disponible'}
+                </span>
+                <span className="sm:hidden">
+                {property.status === 'disponible' ? 'Agendar' : 'No Disp.'}
+                </span>
+            </Button>
+          )}
         </div>
       </div>
     </>
   );
 }
+
+    
 
     
