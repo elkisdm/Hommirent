@@ -25,10 +25,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+// Popover is no longer needed for the main calendar
 import { cn } from '@/lib/utils';
-import { CalendarIcon, User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight } from 'lucide-react';
-import { format, getDay as getDayOfWeek } from 'date-fns';
+import { User, Fingerprint, Mail, Phone, Send, ArrowLeft, ArrowRight, CalendarIcon as CalendarIconLucide } from 'lucide-react'; // Renamed CalendarIcon to avoid conflict
+import { format, getDay as getDayOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Spinner } from '../ui/spinner';
@@ -63,11 +63,11 @@ const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
 
   if (day >= 1 && day <= 5) { // Monday to Friday
     startHour = 9;
-    endHour = 20; // Generates slots up to 19:00 - 20:00
+    endHour = 20; 
   } else if (day === 6) { // Saturday
     startHour = 10;
-    endHour = 18; // Generates slots up to 17:00 - 18:00
-  } else { // Sunday or invalid day
+    endHour = 18; 
+  } else { 
     return [];
   }
 
@@ -86,31 +86,28 @@ const formatRutOnInput = (value: string): string => {
 
   let body = cleaned.slice(0, -1);
   let verifier = cleaned.slice(-1);
-
+  
   if (cleaned.length > 9) {
     body = cleaned.substring(0, cleaned.length -1);
     verifier = cleaned.substring(cleaned.length-1);
   }
   
-  // Limit numeric part to 8 digits
   if (body.length > 8) {
     body = body.substring(0, 8);
   }
   
-  // If the "verifier" is not a valid verifier char, it's part of the body
   if (!/^[0-9K]$/.test(verifier) && cleaned.length <= 8) {
     body = cleaned;
     verifier = '';
   } else if (!/^[0-9K]$/.test(verifier) && cleaned.length > 8) {
      body = cleaned.substring(0,8);
-     verifier = ''; // Or slice from original cleaned if logic is different
+     verifier = '';
   }
-
 
   if (body.length > 0 && verifier) {
     return `${body}-${verifier}`;
   }
-  return cleaned; // Return 'cleaned' if no verifier yet or if it's just numbers
+  return cleaned;
 };
 
 
@@ -124,7 +121,6 @@ export function VisitRequestDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<VisitRequestFormValues>({
@@ -157,7 +153,6 @@ export function VisitRequestDialog({
     if (currentStep === 1) {
       fieldsToValidate = ['firstName', 'lastName', 'rut', 'email', 'phone'];
     }
-    // No validation needed to move from step 2 to 3 if date/time are optional until final submit
     
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
@@ -173,7 +168,6 @@ export function VisitRequestDialog({
     form.reset();
     setCurrentStep(1);
     setAvailableTimes([]);
-    setIsCalendarOpen(false);
     onOpenChange(false);
   }
 
@@ -188,7 +182,6 @@ export function VisitRequestDialog({
       visitTime: values.visitTime,
     });
 
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     toast({
@@ -208,6 +201,9 @@ export function VisitRequestDialog({
     form.setValue('rut', formatted, { shouldValidate: true });
   };
 
+  const today = new Date();
+  const sevenDaysFromNow = addDays(today, 7);
+
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
@@ -217,7 +213,7 @@ export function VisitRequestDialog({
             onOpenChange(true);
         }
     }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl"> {/* Adjusted max-width for side-by-side calendar */}
         <DialogHeader>
           <DialogTitle className="text-2xl">Agendar Visita</DialogTitle>
           <DialogDescription>
@@ -226,7 +222,7 @@ export function VisitRequestDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="overflow-y-auto max-h-[calc(100vh-20rem)] sm:max-h-[60vh] pr-2 -mr-2 sm:pr-3 sm:-mr-3custom-scrollbar">
+        <div className="overflow-y-auto max-h-[calc(100vh-20rem)] sm:max-h-[70vh] pr-2 -mr-2 sm:pr-3 sm:-mr-3custom-scrollbar">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
               {currentStep === 1 && (
@@ -322,58 +318,44 @@ export function VisitRequestDialog({
               )}
 
               {currentStep === 2 && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="visitDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Fecha de Visita</FormLabel>
-                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  'w-full pl-3 text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP', { locale: es })
-                                ) : (
-                                  <span>Elige una fecha</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="md:w-1/2 lg:w-auto"> {/* Calendar column */}
+                    <FormField
+                      control={form.control}
+                      name="visitDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center md:items-start">
+                          <FormLabel className="mb-1 self-start">Fecha de Visita</FormLabel>
+                          <FormControl>
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={(date) => {
-                                field.onChange(date);
-                                if (date) setIsCalendarOpen(false);
-                              }}
-                              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0} 
+                              onSelect={field.onChange}
+                              disabled={(date) => 
+                                date < new Date(new Date().setDate(today.getDate() -1)) || // past dates
+                                getDayOfWeek(date) === 0 || // Sunday
+                                date > sevenDaysFromNow // More than 7 days from now
+                              }
                               initialFocus
                               locale={es}
+                              className="rounded-md border shadow-sm bg-popover p-2" // Style calendar directly
                             />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {selectedDate && (
-                    <div className="mt-1">
-                       <p className="text-xs text-muted-foreground mb-2 text-center">Horarios en zona horaria de Chile.</p>
-                      {availableTimes.length > 0 ? (
-                        <>
-                          <FormLabel className="mb-2 block text-sm">Hora Disponible para {format(selectedDate, "PPP", { locale: es })}</FormLabel>
-                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto py-1 pr-1">
+                          </FormControl>
+                          <FormMessage className="mt-1 self-start" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex-1 md:w-1/2 lg:flex-1"> {/* Time slots column */}
+                    {selectedDate ? (
+                      <>
+                        <FormLabel className="mb-2 block text-sm">
+                          Horarios para {format(selectedDate, "PPP", { locale: es })}
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground mb-2">Horarios en zona horaria de Chile.</p>
+                        {availableTimes.length > 0 ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto py-1 pr-1 custom-scrollbar">
                             {availableTimes.map((time) => (
                               <Button
                                 key={time}
@@ -388,24 +370,26 @@ export function VisitRequestDialog({
                               </Button>
                             ))}
                           </div>
-                        </>
-                      ) : (
-                        <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para este día. Por favor, elige otra fecha.</p>
-                      )}
-                    </div>
-                  )}
-                  <FormField
-                      control={form.control}
-                      name="visitTime"
-                      render={() => (
-                          // Hidden FormItem to ensure 'visitTime' validation message can be displayed if needed,
-                          // even though selection is done via buttons.
-                          <FormItem className="h-0 !mt-0 invisible"> 
-                              <FormMessage />
-                          </FormItem>
-                      )}
-                  />
-                </>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para este día. Por favor, elige otra fecha.</p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm p-4 border rounded-md bg-muted/50 min-h-[200px]">
+                        Selecciona una fecha del calendario para ver los horarios disponibles.
+                      </div>
+                    )}
+                     <FormField
+                        control={form.control}
+                        name="visitTime"
+                        render={() => (
+                            <FormItem className="h-0 !mt-0 invisible"> 
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                  </div>
+                </div>
               )}
             </form>
           </Form>
@@ -450,3 +434,5 @@ export function VisitRequestDialog({
     </Dialog>
   );
 }
+
+    
