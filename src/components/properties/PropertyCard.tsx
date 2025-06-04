@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,7 +16,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   };
 
   return (
-    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col group">
+    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col group hover:scale-[1.01]">
       <CardHeader className="p-0">
         <Link href={`/properties/${property.propertyId}`} className="block overflow-hidden">
           <div className="relative h-56 w-full">
@@ -47,7 +48,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <Bath className="w-4 h-4 mr-1 text-primary" /> {property.bathrooms} baños
           </div>
           <div className="flex items-center">
-            <Square className="w-4 h-4 mr-1 text-primary" /> {property.areaSqMeters} m² 
+            <Square className="w-4 h-4 mr-1 text-primary" /> {property.areaSqMeters} m²
           </div>
         </div>
         <p className="text-xl font-semibold text-primary mb-2">{formatPrice(property.price)} <span className="text-xs text-muted-foreground">{property.currency}</span></p>

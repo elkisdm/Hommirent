@@ -12,11 +12,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
-// import { db } from '@/lib/firebase/config'; // Firestore imports commented out for mock data
-// import { collection, getDocs, query, where, Timestamp, limit } from 'firebase/firestore';
-import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight } from 'lucide-react'; 
+import { getProperties } from '@/lib/firebase/firestore';
+import { Search, Home, BedDouble, Sparkles, Gift, Star, PlayCircle, Square, ChevronRight, Briefcase } from 'lucide-react';
 import Link from 'next/link';
-import { Timestamp } from 'firebase/firestore'; // Keep for mock data type consistency
+import { Timestamp } from 'firebase/firestore';
+import { PropertyCard } from '@/components/properties/PropertyCard';
+import { Separator } from '@/components/ui/separator';
 
 // Mock data for now, replace with Firestore fetching
 const mockProperties: Property[] = [
@@ -29,7 +30,7 @@ const mockProperties: Property[] = [
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 500000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 60,
     amenities: ['estacionamiento', 'bodega', 'conserjeria', 'piscina', 'gimnasio'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+2D1B+A`, `https://placehold.co/600x400.png?text=Torres+Living+A`, `https://placehold.co/600x400.png?text=Torres+Piscina`, `https://placehold.co/600x400.png?text=Torres+Gimnasio`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Torres+2D1B+A`, `https://placehold.co/600x400.png?text=Torres+Living+A`, `https://placehold.co/600x400.png?text=Torres+Piscina`, `https://placehold.co/600x400.png?text=Torres+Gimnasio`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Torres+2D1B+A`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
@@ -42,7 +43,7 @@ const mockProperties: Property[] = [
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 380000, currency: 'CLP', bedrooms: 0, bathrooms: 1, areaSqMeters: 35,
     amenities: ['estacionamiento', 'balcon', 'piscina'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Torres+Estudio+B`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
@@ -55,7 +56,7 @@ const mockProperties: Property[] = [
     address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
     price: 650000, currency: 'CLP', bedrooms: 3, bathrooms: 2, areaSqMeters: 85,
     amenities: ['estacionamiento', 'bodega', 'piscina', 'terraza', 'gimnasio'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Torres+3D2B+C`, `https://placehold.co/600x400.png?text=Torres+Dormitorio+C`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Torres+3D2B+C`, `https://placehold.co/600x400.png?text=Torres+Dormitorio+C`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Torres+3D2B+C`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
@@ -68,7 +69,7 @@ const mockProperties: Property[] = [
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 450000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 50,
     amenities: ['gimnasio', 'sala multiuso', 'lavanderia', 'quincho'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Central+Loft+D`,
     status: 'arrendado', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
@@ -81,7 +82,7 @@ const mockProperties: Property[] = [
     address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
     price: 580000, currency: 'CLP', bedrooms: 2, bathrooms: 2, areaSqMeters: 70,
     amenities: ['estacionamiento', 'gimnasio', 'piscina', 'quincho', 'seguridad'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Central+2D2B+E`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
@@ -94,21 +95,21 @@ const mockProperties: Property[] = [
     address: { street: `Valle Escondido 700`, commune: 'Las Condes', city: 'Santiago', region: 'Metropolitana' },
     price: 1200000, currency: 'CLP', bedrooms: 4, bathrooms: 3, areaSqMeters: 220,
     amenities: ['estacionamiento', 'jardin', 'piscina', 'seguridad'],
-    imageUrls: [`https://placehold.co/600x400.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`], 
+    imageUrls: [`https://placehold.co/600x400.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`],
     mainImageUrl: `https://placehold.co/600x400.png?text=Valle+4D3B+F`,
     status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
   },
 ];
 
 interface TypologyGroup {
-  typologyKey: string; 
+  typologyKey: string;
   typologyName: string; // Abbreviated name for display e.g., "2D - 1B"
   units: Property[];
 }
 
 interface Promotion {
   text: string;
-  icon?: React.ElementType; 
+  icon?: React.ElementType;
 }
 
 interface CondominioGroup {
@@ -117,14 +118,14 @@ interface CondominioGroup {
   condominioImageUrls: string[];
   condominioAmenities: string[];
   condominioPromotions: Promotion[];
-  address?: Property['address']; 
+  address?: Property['address'];
 }
 
 const santiagoMetropolitanCommunes: string[] = [
-  "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", 
-  "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", 
-  "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", 
-  "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", 
+  "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central",
+  "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana",
+  "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú",
+  "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura",
   "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura",
   "Puente Alto", "Pirque", "San José de Maipo",
   "San Bernardo", "Buin", "Calera de Tango", "Paine",
@@ -137,14 +138,17 @@ const santiagoMetropolitanCommunes: string[] = [
 export default function PropertiesPage() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [groupedProperties, setGroupedProperties] = useState<CondominioGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // For main list
   const [searchTerm, setSearchTerm] = useState('');
   const [communeFilter, setCommuneFilter] = useState('');
-  const [priceRangeFilter, setPriceRangeFilter] = useState(''); 
+  const [priceRangeFilter, setPriceRangeFilter] = useState('');
   const [bedroomsFilter, setBedroomsFilter] = useState('');
 
+  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
   const getTypologyKey = (property: Property): string => `${property.bedrooms}D-${property.bathrooms}B`;
-  
+
   const getAbbreviatedTypologyLabel = (bedrooms: number, bathrooms: number): string => {
     const bedLabel = bedrooms === 0 ? "Estudio" : `${bedrooms}D`;
     const bathLabel = `${bathrooms}B`;
@@ -157,31 +161,36 @@ export default function PropertiesPage() {
 
 
   useEffect(() => {
-    const fetchAndProcessProperties = async () => {
+    const fetchInitialData = async () => {
       setLoading(true);
+      setLoadingFeatured(true);
       try {
-        // Simulate fetching: Replace with actual Firestore call when ready
-        // const propertiesRef = collection(db, 'properties');
-        // const q = query(propertiesRef, where('status', '==', 'disponible'), limit(50)); // Example query
-        // const querySnapshot = await getDocs(q);
-        // const fetchedProps = querySnapshot.docs.map(doc => ({ propertyId: doc.id, ...doc.data() } as Property));
-        const fetchedProps = mockProperties.filter(p => p.status === 'disponible'); 
-        setAllProperties(fetchedProps);
+        // Fetch all properties (or a larger set for filtering)
+        // const mainProps = await getProperties({ status: 'disponible', count: 50 }); // Example: Fetch 50 for main list
+        const mainProps = mockProperties.filter(p => p.status === 'disponible'); // Using mock for now
+        setAllProperties(mainProps);
+
+        // Fetch featured properties (a smaller, specific set)
+        // const featured = await getProperties({ status: 'disponible', count: 3 }); // Fetch 3 featured
+        const featured = mockProperties.filter(p => p.status === 'disponible').slice(0, 3);
+        setFeaturedProperties(featured);
+
       } catch (error) {
         console.error("Error fetching properties: ", error);
       } finally {
         setLoading(false);
+        setLoadingFeatured(false);
       }
     };
 
-    fetchAndProcessProperties();
+    fetchInitialData();
   }, []);
 
 
   useEffect(() => {
     let filtered = allProperties;
     if (searchTerm) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.address.commune.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,7 +207,7 @@ export default function PropertiesPage() {
       } else if (bedroomsFilter === "4+") { // 4+ Dormitorios
         filtered = filtered.filter(p => p.bedrooms >= 4);
       } else if (bedroomsFilter === "loft") { // Loft (approximated as 1 bedroom for now)
-        filtered = filtered.filter(p => p.bedrooms === 1); 
+        filtered = filtered.filter(p => p.bedrooms === 1);
       } else {
         const numBedrooms = parseInt(bedroomsFilter);
         if (!isNaN(numBedrooms)) {
@@ -211,14 +220,13 @@ export default function PropertiesPage() {
       const [min, max] = priceRangeFilter.split('-').map(Number);
       if (!isNaN(min) && !isNaN(max)) {
         filtered = filtered.filter(p => p.price >= min && p.price <= max);
-      } else if (!isNaN(min)) { // Only min is defined (e.g., "Desde X")
+      } else if (!isNaN(min)) {
         filtered = filtered.filter(p => p.price >= min);
-      } else if (!isNaN(max)) { // Only max is defined (e.g., "Hasta X")
+      } else if (!isNaN(max)) {
         filtered = filtered.filter(p => p.price <= max);
       }
     }
 
-    // Group properties by condominioName and then by typology
     const condominiosMap = new Map<string, Map<string, Property[]>>();
     const condominioDetailsMap = new Map<string, { images: Set<string>, amenities: Set<string>, address?: Property['address']}>();
 
@@ -227,11 +235,9 @@ export default function PropertiesPage() {
         condominiosMap.set(property.condominioName, new Map<string, Property[]>());
         condominioDetailsMap.set(property.condominioName, { images: new Set(), amenities: new Set(), address: property.address });
       }
-      
+
       const details = condominioDetailsMap.get(property.condominioName)!;
-      // Prioritize mainImageUrl for the project's primary display image
       if (property.mainImageUrl) details.images.add(property.mainImageUrl);
-      // Then add other images, ensuring no duplicates and limiting total
       property.imageUrls.forEach(img => details.images.add(img));
       property.amenities.forEach(am => details.amenities.add(am));
 
@@ -252,19 +258,19 @@ export default function PropertiesPage() {
           typologies.push({
             typologyKey,
             typologyName: getAbbreviatedTypologyLabel(units[0].bedrooms, units[0].bathrooms),
-            units: units.sort((a,b) => a.price - b.price), // Sort units by price within typology
+            units: units.sort((a,b) => a.price - b.price),
           });
         }
       });
 
       if (typologies.length > 0) {
         const condoDetails = condominioDetailsMap.get(condominioName)!;
-        const uniqueImageUrls = Array.from(condoDetails.images).slice(0, 4); // Max 4 images for gallery
-        
+        const uniqueImageUrls = Array.from(condoDetails.images).slice(0, 4);
+
         grouped.push({
           condominioName,
-          address: condoDetails.address, 
-          typologies: typologies.sort((a,b) => { // Sort typologies (Estudio first, then by beds)
+          address: condoDetails.address,
+          typologies: typologies.sort((a,b) => {
             const getSortValue = (typKey: string) => {
               const parts = typKey.split('D-');
               const beds = parseInt(parts[0]);
@@ -273,16 +279,13 @@ export default function PropertiesPage() {
             return getSortValue(a.typologyKey) - getSortValue(b.typologyKey);
           }),
           condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/600x400.png?text=${encodeURIComponent(condominioName)}`],
-          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6), // Max 6 amenities
-          // Example promotions
-          condominioPromotions: condominioName.toLowerCase().includes("park") 
-            ? [{ text: "Primer mes 50% OFF", icon: Gift }, {text: "GGCC gratis x 3 meses", icon: Star}] 
+          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 6),
+          condominioPromotions: condominioName.toLowerCase().includes("park")
+            ? [{ text: "Primer mes 50% OFF", icon: Gift }, {text: "GGCC gratis x 3 meses", icon: Star}]
             : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle}] : []),
         });
       }
     });
-    
-    // Sort condominio groups by name
     setGroupedProperties(grouped.sort((a,b) => a.condominioName.localeCompare(b.condominioName)));
 
   }, [searchTerm, communeFilter, priceRangeFilter, bedroomsFilter, allProperties]);
@@ -290,10 +293,10 @@ export default function PropertiesPage() {
   const priceRanges = [
     { label: 'Hasta $500.000', value: '0-500000'},
     { label: '$500.001 - $800.000', value: '500001-800000'},
-    { label: 'Desde $800.001', value: '800001-999999999'}, // Using a large number for "max"
+    { label: 'Desde $800.001', value: '800001-999999999'},
   ];
 
-  if (loading && groupedProperties.length === 0) { // Initial loading state
+  if (loading && loadingFeatured && groupedProperties.length === 0 && featuredProperties.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-20rem)]">
         <Spinner size="large" />
@@ -302,65 +305,87 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-heading-foreground">Encuentra tu Próximo Hogar</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Explora las unidades disponibles en nuestros proyectos.</p>
+    <div className="space-y-12">
+      <div className="text-center pt-8">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-heading-foreground flex items-center justify-center">
+          <Briefcase className="mr-3 h-10 w-10 text-primary" />
+          Encuentra tu Próximo Hogar en Hommie.cl AI
+        </h1>
+        <p className="mt-4 text-xl text-muted-foreground">
+          Explora nuestra selección de propiedades y descubre el lugar perfecto para ti.
+        </p>
       </div>
 
-      {/* Filters Section */}
-      <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-          <div className="space-y-1 lg:col-span-2">
-            <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Buscar</label>
-            <Input 
-                id="search"
-                placeholder="Proyecto, comuna, características..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <section>
+        <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Propiedades Destacadas</h2>
+        {loadingFeatured ? (
+          <div className="flex justify-center py-8"><Spinner /></div>
+        ) : featuredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredProperties.map((prop) => (
+              <PropertyCard key={prop.propertyId} property={prop} />
+            ))}
           </div>
-          <div className="space-y-1">
-            <label htmlFor="commune" className="text-sm font-medium text-muted-foreground">Comuna</label>
-            <Select value={communeFilter} onValueChange={setCommuneFilter}>
-              <SelectTrigger id="commune">
-                <SelectValue placeholder="Todas las comunas" />
-              </SelectTrigger>
-              <SelectContent>
-                {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
+        ) : (
+          <p className="text-center text-muted-foreground py-8">No hay propiedades destacadas en este momento.</p>
+        )}
+      </section>
+
+      <Separator className="my-10" />
+
+      <section>
+        <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Busca y Filtra Propiedades</h2>
+        <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <div className="space-y-1 lg:col-span-2">
+              <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Buscar</label>
+              <Input
+                  id="search"
+                  placeholder="Proyecto, comuna, características..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="commune" className="text-sm font-medium text-muted-foreground">Comuna</label>
+              <Select value={communeFilter} onValueChange={setCommuneFilter}>
+                <SelectTrigger id="commune">
+                  <SelectValue placeholder="Todas las comunas" />
+                </SelectTrigger>
+                <SelectContent>
+                  {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="bedrooms" className="text-sm font-medium text-muted-foreground">Tipología</label>
+              <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
+                <SelectTrigger id="bedrooms">
+                  <SelectValue placeholder="Cualquier tipología" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Estudio</SelectItem>
+                  <SelectItem value="1">1 Dormitorio</SelectItem>
+                  <SelectItem value="2">2 Dormitorios</SelectItem>
+                  <SelectItem value="3">3 Dormitorios</SelectItem>
+                  <SelectItem value="4+">4+ Dormitorios</SelectItem>
+                  <SelectItem value="loft">Loft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              className="w-full md:w-auto"
+              onClick={() => {}}
+            >
+              <Search className="mr-2 h-4 w-4" /> Aplicar Filtros
+            </Button>
           </div>
-          <div className="space-y-1">
-            <label htmlFor="bedrooms" className="text-sm font-medium text-muted-foreground">Tipología</label>
-            <Select value={bedroomsFilter} onValueChange={setBedroomsFilter}>
-              <SelectTrigger id="bedrooms">
-                <SelectValue placeholder="Cualquier tipología" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">Estudio</SelectItem>
-                <SelectItem value="1">1 Dormitorio</SelectItem>
-                <SelectItem value="2">2 Dormitorios</SelectItem>
-                <SelectItem value="3">3 Dormitorios</SelectItem>
-                <SelectItem value="4+">4+ Dormitorios</SelectItem>
-                <SelectItem value="loft">Loft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {/* Apply Filters button - could trigger manual re-filter if not auto-filtering on change */}
-          <Button 
-            className="w-full md:w-auto" 
-            onClick={() => { /* Logic to explicitly apply filters if needed, or can be removed if filtering is auto */ }}
-          >
-            <Search className="mr-2 h-4 w-4" /> Aplicar Filtros
-          </Button>
         </div>
-      </div>
+      </section>
 
-      {/* Properties Listing */}
-      {loading && <div className="flex justify-center py-8"><Spinner /></div>} {/* Spinner for subsequent filtering loads */}
-      
-      {!loading && groupedProperties.length === 0 && (
+      {loading && !loadingFeatured ? <div className="flex justify-center py-8"><Spinner /></div> : null}
+
+      {!loading && groupedProperties.length === 0 && !loadingFeatured && (
         <p className="text-center text-muted-foreground py-8">No se encontraron propiedades con los criterios seleccionados.</p>
       )}
 
@@ -368,15 +393,13 @@ export default function PropertiesPage() {
         <div className="space-y-6">
           {groupedProperties.map((condominio) => (
             <Card key={condominio.condominioName} className="overflow-hidden shadow-lg rounded-xl border border-border/40">
-              {/* Condominio Header */}
               <CardHeader className="p-4 md:p-6 bg-card/60">
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-                  {/* Image Gallery Column */}
                   <div className="w-full lg:w-2/5 space-y-2 flex-shrink-0">
                     <div className="relative aspect-video rounded-lg overflow-hidden shadow-md group">
-                      <Image 
-                        src={condominio.condominioImageUrls[0]} 
-                        alt={`Imagen principal de ${condominio.condominioName}`} 
+                      <Image
+                        src={condominio.condominioImageUrls[0]}
+                        alt={`Imagen principal de ${condominio.condominioName}`}
                         fill
                         style={{objectFit:"cover"}}
                         data-ai-hint="apartment building exterior"
@@ -389,9 +412,9 @@ export default function PropertiesPage() {
                       <div className="grid grid-cols-3 gap-2">
                         {condominio.condominioImageUrls.slice(1, Math.min(4, condominio.condominioImageUrls.length)).map((url, idx) => (
                           <div key={idx} className="relative aspect-square rounded-md overflow-hidden shadow group">
-                            <Image 
-                              src={url} 
-                              alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`} 
+                            <Image
+                              src={url}
+                              alt={`Thumbnail ${idx + 1} de ${condominio.condominioName}`}
                               fill
                               style={{objectFit:"cover"}}
                               data-ai-hint="building facade detail"
@@ -402,8 +425,6 @@ export default function PropertiesPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Condominio Info Column */}
                   <div className="w-full lg:w-3/5 space-y-3 mt-2 lg:mt-0">
                     <CardTitle className="text-2xl md:text-3xl flex items-center font-bold text-heading-foreground">
                       <Home className="mr-3 h-7 w-7 text-primary" />
@@ -414,16 +435,14 @@ export default function PropertiesPage() {
                             {condominio.address.street}{condominio.address.number ? `, ${condominio.address.number}` : ''}, {condominio.address.commune}, {condominio.address.city}
                         </CardDescription>
                     )}
-                    
-
                     {condominio.condominioAmenities && condominio.condominioAmenities.length > 0 && (
                       <div className="pt-2">
                         <h4 className="text-sm font-semibold mb-2 text-foreground/80">Comodidades Destacadas del Proyecto</h4>
                         <div className="flex flex-wrap gap-2">
                           {condominio.condominioAmenities.map((amenity, idx) => (
-                            <Badge 
-                              key={idx} 
-                              variant="outline" 
+                            <Badge
+                              key={idx}
+                              variant="outline"
                               className="border-teal-600 text-teal-600 bg-teal-500/10 hover:bg-teal-500/20 dark:border-teal-500 dark:text-teal-400 dark:bg-teal-500/10 dark:hover:bg-teal-500/20 shadow-sm"
                             >
                               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
@@ -433,7 +452,6 @@ export default function PropertiesPage() {
                         </div>
                       </div>
                     )}
-
                     {condominio.condominioPromotions && condominio.condominioPromotions.length > 0 && (
                       <div className="pt-2">
                         <h4 className="text-sm font-semibold mb-2 text-foreground/80">Promociones Vigentes</h4>
@@ -450,7 +468,7 @@ export default function PropertiesPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 bg-background/90"> {/* Changed padding and background */}
+              <CardContent className="p-0 bg-background/90">
                 <Accordion type="multiple" className="w-full">
                   {condominio.typologies.map((typology) => (
                     <AccordionItem value={typology.typologyKey} key={typology.typologyKey} className="border-b border-border/20 last:border-b-0">
@@ -463,11 +481,11 @@ export default function PropertiesPage() {
                             </div>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="pt-0 pb-0 bg-background/95"> {/* Adjusted background */}
+                      <AccordionContent className="pt-0 pb-0 bg-background/95">
                         <div className="divide-y divide-border/20">
                           {typology.units.map((unit) => (
                             <div key={unit.propertyId} className="flex items-center justify-between py-4 px-4 hover:bg-muted/5 dark:hover:bg-muted/3 transition-colors duration-150 ease-in-out">
-                              <div className="flex-1 min-w-0 pr-3"> {/* Added flex-1 and min-w-0 for better spanning */}
+                              <div className="flex-1 min-w-0 pr-3">
                                 <Link href={`/properties/${unit.propertyId}`} className="hover:underline focus:outline-none focus:ring-1 focus:ring-primary rounded-sm group">
                                   <h4 className="text-md font-semibold text-foreground group-hover:text-primary transition-colors">{unit.title}</h4>
                                 </Link>
@@ -481,10 +499,10 @@ export default function PropertiesPage() {
                                   )}
                                 </div>
                               </div>
-                              <Button 
-                                asChild 
-                                variant="ghost" 
-                                size="sm" 
+                              <Button
+                                asChild
+                                variant="ghost"
+                                size="sm"
                                 className="ml-4 shrink-0 text-primary hover:bg-primary/10 hover:text-primary px-3 py-1.5 rounded-md"
                               >
                                 <Link href={`/properties/${unit.propertyId}`}>
@@ -506,4 +524,3 @@ export default function PropertiesPage() {
     </div>
   );
 }
-
