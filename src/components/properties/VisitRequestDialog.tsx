@@ -81,13 +81,9 @@ const generateTimeSlots = (selectedDate: Date | undefined): string[] => {
 
 const formatRutOnInput = (value: string): string => {
   if (!value) return '';
-
-  // Remove any character that is not a digit or 'K' (case-insensitive)
   let cleaned = value.replace(/[^0-9kK]/gi, '').toUpperCase();
-
   if (cleaned.length === 0) return '';
 
-  // Limit total characters (max 8 for body, 1 for verifier)
   if (cleaned.length > 9) {
     cleaned = cleaned.substring(0, 9);
   }
@@ -95,21 +91,18 @@ const formatRutOnInput = (value: string): string => {
   let body = cleaned;
   let verifier = '';
 
-  // Check if the last character could be a verifier
   if (cleaned.length > 1 && /^[0-9K]$/.test(cleaned.slice(-1))) {
     body = cleaned.slice(0, -1);
     verifier = cleaned.slice(-1);
   } else if (cleaned.length > 8 && !/^[0-9K]$/.test(cleaned.slice(-1))) {
-    // If more than 8 chars and last is not K/digit, it's likely part of body, so cap body
     body = cleaned.substring(0,8);
-    verifier = ''; // No valid verifier yet
+    verifier = '';
   }
-
 
   if (verifier) {
     return `${body}-${verifier}`;
   }
-  return body; // Return only body if no verifier or still typing body
+  return body;
 };
 
 
@@ -123,6 +116,7 @@ export function VisitRequestDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false); // State for calendar popover
   const { toast } = useToast();
 
   const form = useForm<VisitRequestFormValues>({
@@ -144,7 +138,7 @@ export function VisitRequestDialog({
   useEffect(() => {
     if (selectedDate) {
       setAvailableTimes(generateTimeSlots(selectedDate));
-      form.setValue('visitTime', '', {shouldValidate: false}); // Reset time when date changes
+      form.setValue('visitTime', '', {shouldValidate: false}); 
     } else {
       setAvailableTimes([]);
     }
@@ -155,8 +149,7 @@ export function VisitRequestDialog({
     if (currentStep === 1) {
       fieldsToValidate = ['firstName', 'lastName', 'rut', 'email', 'phone'];
     }
-    // Step 2 fields (visitDate, visitTime) are validated on final submit
-
+    
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
       setCurrentStep((prev) => prev + 1);
@@ -171,6 +164,7 @@ export function VisitRequestDialog({
     form.reset();
     setCurrentStep(1);
     setAvailableTimes([]);
+    setIsCalendarOpen(false);
     onOpenChange(false);
   }
 
@@ -180,12 +174,12 @@ export function VisitRequestDialog({
       propertyId,
       propertyTitle,
       ...values,
-      rut: values.rut.toUpperCase(), // Ensure RUT is uppercase
+      rut: values.rut.toUpperCase(), 
       visitDate: format(values.visitDate, "yyyy-MM-dd"),
       visitTime: values.visitTime,
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     toast({
       title: 'Solicitud de Visita Enviada',
@@ -201,7 +195,7 @@ export function VisitRequestDialog({
   
   const handleRutInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatRutOnInput(event.target.value);
-    form.setValue('rut', formatted, { shouldValidate: true }); // Update form value and trigger validation
+    form.setValue('rut', formatted, { shouldValidate: true });
   };
 
 
@@ -210,7 +204,7 @@ export function VisitRequestDialog({
         if (!isOpen) {
             resetFormAndClose();
         } else {
-            onOpenChange(true);
+            onOpenChange(true); // Propagate open state change if dialog is explicitly opened
         }
     }}>
       <DialogContent className="sm:max-w-md">
@@ -221,7 +215,6 @@ export function VisitRequestDialog({
           </DialogDescription>
         </DialogHeader>
         
-        {/* Scrollable Form Content Area */}
         <div className="overflow-y-auto max-h-[calc(100vh-20rem)] sm:max-h-[60vh] pr-2 -mr-2 sm:pr-3 sm:-mr-3custom-scrollbar">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
@@ -262,7 +255,7 @@ export function VisitRequestDialog({
                   <FormField
                     control={form.control}
                     name="rut"
-                    render={({ field }) => ( // field does not include onChange here if we override
+                    render={({ field }) => ( 
                       <FormItem>
                         <FormLabel>RUT</FormLabel>
                         <FormControl>
@@ -271,8 +264,8 @@ export function VisitRequestDialog({
                             <Input 
                               placeholder="Ej: 12345678-9" 
                               {...field} 
-                              onChange={handleRutInputChange} // Use custom handler
-                              value={field.value} // Ensure value is controlled
+                              onChange={handleRutInputChange} 
+                              value={field.value} 
                               className="pl-10" 
                             />
                           </div>
@@ -324,7 +317,7 @@ export function VisitRequestDialog({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Fecha de Visita</FormLabel>
-                        <Popover>
+                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
@@ -347,8 +340,13 @@ export function VisitRequestDialog({
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0} // Disable past dates and Sundays
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(date);
+                                  setIsCalendarOpen(false); // Close popover after date selection
+                                }
+                              }}
+                              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate())) || getDayOfWeek(date) === 0} 
                               initialFocus
                               locale={es}
                             />
@@ -373,7 +371,7 @@ export function VisitRequestDialog({
                             }}
                             className="w-full justify-center text-sm h-9"
                           >
-                            {time.split(' - ')[0]} {/* Show only start time */}
+                            {time.split(' - ')[0]} 
                           </Button>
                         ))}
                       </div>
@@ -382,7 +380,6 @@ export function VisitRequestDialog({
                   {selectedDate && availableTimes.length === 0 && (
                     <p className="mt-2 text-sm text-muted-foreground text-center py-2">No hay horarios disponibles para este día. Por favor, elige otra fecha.</p>
                   )}
-                  {/* Hidden FormField for visitTime to show validation errors if any */}
                   <FormField
                       control={form.control}
                       name="visitTime"
@@ -396,7 +393,7 @@ export function VisitRequestDialog({
               )}
             </form>
           </Form>
-        </div> {/* End Scrollable Form Content Area */}
+        </div> 
         
         <DialogFooter className="pt-4 mt-auto flex flex-row justify-between sm:justify-between w-full">
           {currentStep > 1 && (
@@ -410,7 +407,7 @@ export function VisitRequestDialog({
                 type="button" 
                 onClick={handleNextStep} 
                 disabled={isLoading} 
-                className={currentStep === 1 ? 'w-full sm:w-auto ml-auto' : ''} // Full width on mobile for step 1, auto on others
+                className={currentStep === 1 ? 'w-full sm:w-auto ml-auto' : ''} 
             >
               Siguiente
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -422,15 +419,15 @@ export function VisitRequestDialog({
               Solicitar Visita
             </Button>
           )}
-          {currentStep === 1 && !isLoading && ( // Show cancel button only on step 1 if not loading
-              <DialogClose asChild>
-                <Button type="button" variant="ghost" className="hidden sm:inline-flex">Cancelar</Button>
+          {currentStep === 1 && !isLoading && ( 
+              <DialogClose asChild className="hidden sm:inline-flex">
+                <Button type="button" variant="ghost">Cancelar</Button>
               </DialogClose>
           )}
         </DialogFooter>
-          {currentStep === 1 && ( // Full width cancel button for mobile on step 1
-              <DialogClose asChild>
-                <Button type="button" variant="outline" className="w-full mt-2 sm:hidden">Cancelar</Button>
+          {currentStep === 1 && ( 
+              <DialogClose asChild className="sm:hidden">
+                <Button type="button" variant="outline" className="w-full mt-2">Cancelar</Button>
               </DialogClose>
           )}
       </DialogContent>
