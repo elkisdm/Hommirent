@@ -17,6 +17,7 @@ import {
   Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View, Lightbulb, MessageCircleQuestion,
 } from 'lucide-react';
 import type { Property } from '@/types';
+import { getPropertyById } from '@/lib/firebase/firestore'; // Import Firestore function
 import { Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -28,49 +29,10 @@ import { VisitRequestDialog } from '@/components/properties/VisitRequestDialog';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-
-// Mock data for a single property, replace with Firestore fetching
-const mockProperty: Property = {
-  propertyId: 'prop-1',
-  ownerUid: 'owner-1',
-  title: 'Luminoso Departamento de 2 Dormitorios con Terraza y Vista Despejada en Providencia', // Original title for metadata or fallback
-  condominioName: 'Vista Azul', // Example: Could be "Edificio Vista Azul" or just "Vista Azul"
-  description: 'Disfruta de atardeceres inolvidables desde su amplia terraza en este espectacular departamento en el corazón de Providencia. Con acabados de lujo, amplios espacios y vistas inigualables, esta propiedad ofrece un estilo de vida moderno y cómodo. Cercano a los mejores restaurantes, tiendas y parques, representa una oportunidad única.\n\nEl departamento cuenta con una excelente distribución, cocina moderna integrada y equipada, y dormitorios espaciosos con closets. El edificio ofrece seguridad 24/7 y excelentes amenidades para toda la familia.',
-  address: {
-    street: 'Las Violetas 123',
-    number: 'Depto 1001',
-    commune: 'Providencia',
-    city: 'Santiago',
-    region: 'Metropolitana',
-  },
-  price: 750000,
-  currency: 'CLP',
-  bedrooms: 2,
-  bathrooms: 2,
-  areaSqMeters: 95, // total
-  amenities: ['piscina temperada', 'estacionamiento subterráneo', 'bodega amplia', 'pet-friendly', 'gimnasio equipado', 'sala de eventos', 'seguridad 24/7', 'terraza panorámica común', 'bicicletero', 'accesos controlados', 'ascensor', 'juegos infantiles', 'áreas verdes'],
-  imageUrls: [
-    'https://placehold.co/1200x800.png?text=Depto+Providencia+Principal',
-    'https://placehold.co/1200x800.png?text=Depto+Living',
-    'https://placehold.co/1200x800.png?text=Depto+Dormitorio+1',
-    'https://placehold.co/1200x800.png?text=Depto+Cocina',
-    'https://placehold.co/1200x800.png?text=Depto+Baño+1',
-    'https://placehold.co/1200x800.png?text=Depto+Terraza',
-    'https://placehold.co/1200x800.png?text=Edificio+Fachada',
-  ],
-  mainImageUrl: 'https://placehold.co/1200x800.png?text=Depto+Providencia+Principal',
-  status: 'disponible',
-  virtualTourUrl: 'https://my.matterport.com/show/?m=DEMOID', // Example URL
-  createdAt: Timestamp.now(),
-  updatedAt: Timestamp.now(),
-};
-
 const motivationalMessages = [
   "¿Alguna duda? ¡Pregúntame!",
-  "¿Sabías que Providencia tiene muchas ciclovías?",
   "Estoy aquí para ayudarte.",
   "Consulta sobre esta propiedad.",
-  "¿Qué te parece esta comuna?",
 ];
 
 const LOCAL_STORAGE_SCHEDULED_VISITS_KEY = 'hommieScheduledVisits';
@@ -80,7 +42,7 @@ interface ScheduledVisitInfo {
   propertyTitle: string;
 }
 
-const WHATSAPP_CONTACT_NUMBER = '+56993481594'; // Updated WhatsApp number
+const WHATSAPP_CONTACT_NUMBER = '+56993481594';
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -89,7 +51,7 @@ export default function PropertyDetailsPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false); // Placeholder state
+  const [isFavorite, setIsFavorite] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentFabMessageIndex, setCurrentFabMessageIndex] = useState(0);
   const [isVisitDialogOpen, setIsVisitDialogOpen] = useState(false);
@@ -101,7 +63,7 @@ export default function PropertyDetailsPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFabMessageIndex((prevIndex) => (prevIndex + 1) % motivationalMessages.length);
-    }, 7000); // Change message every 7 seconds
+    }, 7000); 
     return () => clearInterval(interval);
   }, []);
 
@@ -111,7 +73,13 @@ export default function PropertyDetailsPage() {
     const fetchProperty = async () => {
       setLoading(true);
       try {
-        setProperty(mockProperty); // Using mock data for now
+        const fetchedProperty = await getPropertyById(propertyId);
+        if (fetchedProperty) {
+          setProperty(fetchedProperty);
+        } else {
+          toast({ title: "Propiedad no encontrada", description: "La propiedad que buscas no existe o ya no está disponible.", variant: "destructive" });
+          router.push('/properties');
+        }
       } catch (error) {
         console.error("Error fetching property: ", error);
         toast({ title: "Error", description: "No se pudo cargar la propiedad.", variant: "destructive" });
@@ -122,7 +90,6 @@ export default function PropertyDetailsPage() {
 
     fetchProperty();
 
-    // Load scheduled visit from LocalStorage
     const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
     if (storedVisitsRaw) {
       try {
@@ -135,7 +102,7 @@ export default function PropertyDetailsPage() {
       } catch (e) {
         console.error("Error parsing scheduled visits from localStorage", e);
         setScheduledVisit(null);
-        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY); // Clear corrupted data
+        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
       }
     } else {
       setScheduledVisit(null);
@@ -181,7 +148,7 @@ export default function PropertyDetailsPage() {
     localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
 
     setScheduledVisit(newVisit);
-    setIsVisitDialogOpen(false); // Dialog will also call its onOpenChange(false)
+    setIsVisitDialogOpen(false);
   };
 
 
@@ -192,10 +159,12 @@ export default function PropertyDetailsPage() {
   }
 
   if (!property) {
+    // This case is handled by the redirect in useEffect if property is not found,
+    // but it's good practice to have a fallback UI.
     return <div className="text-center py-10">
       <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-      <h2 className="mt-4 text-2xl font-semibold">Propiedad no encontrada</h2>
-      <p className="text-muted-foreground">La propiedad que buscas no existe o no está disponible.</p>
+      <h2 className="mt-4 text-2xl font-semibold">Cargando Propiedad...</h2>
+      <p className="text-muted-foreground">Si no se carga, la propiedad podría no estar disponible.</p>
       <Button onClick={() => router.push('/properties')} className="mt-6">Volver a Propiedades</Button>
     </div>;
   }
@@ -215,25 +184,25 @@ export default function PropertyDetailsPage() {
   const hasParking = property.amenities.some(a => a.toLowerCase().includes('estacionamiento'));
   const hasBodega = property.amenities.some(a => a.toLowerCase().includes('bodega'));
   const derivedTypology = `${property.bedrooms}D-${property.bathrooms}B`;
-  const displayTitle = `Dpto N° ${getUnitIdentifier(property.address.number)} ${property.condominioName} - ${derivedTypology}`;
-
-
-  const mockData = { // These would ideally come from property object if schema extended
-    areaUtilesSqMeters: property.areaSqMeters - 10 > 0 ? property.areaSqMeters -10 : property.areaSqMeters,
-    anoConstruccion: 2020,
-    orientacion: 'Nororiente',
-    tipoPiso: 'Porcelanato y flotante',
-    tipoVentanas: 'Termopanel',
-    tipoCocina: 'Integrada y equipada',
-    logia: true,
-    walkInCloset: true,
-    calefaccion: 'Losa radiante',
-    aireAcondicionado: false,
-    politicaMascotas: 'Sí, se aceptan (consultar condiciones)',
-    disponibilidad: 'Inmediata',
-    gastosComunesAprox: 135000,
-    incluyeEnGastosComunes: 'Agua caliente, mantención áreas comunes',
-    comisionArrendatario: '50% + IVA de un mes de arriendo',
+  const displayTitle = `Unidad ${getUnitIdentifier(property.address.number)} ${property.condominioName} - ${derivedTypology}`;
+  
+  // Mock data for fields not yet in Property type, these would ideally come from property object
+   const mockData = { 
+    areaUtilesSqMeters: property.areaSqMeters > 10 ? property.areaSqMeters - 10 : property.areaSqMeters,
+    anoConstruccion: 2020, // Example, should be in DB
+    orientacion: 'Nororiente', // Example
+    tipoPiso: 'Porcelanato y flotante', // Example
+    tipoVentanas: 'Termopanel', // Example
+    tipoCocina: 'Integrada y equipada', // Example
+    logia: true, // Example
+    walkInCloset: true, // Example
+    calefaccion: 'Losa radiante', // Example
+    aireAcondicionado: false, // Example
+    politicaMascotas: property.amenities.some(a => a.toLowerCase().includes('pet-friendly')) ? 'Sí, se aceptan' : 'Consultar', // Example
+    disponibilidad: 'Inmediata', // Example
+    gastosComunesAprox: property.price > 700000 ? 135000 : 80000, // Example calculation
+    incluyeEnGastosComunes: 'Agua caliente, mantención áreas comunes', // Example
+    comisionArrendatario: '50% + IVA de un mes de arriendo', // Example
     requisitos: [
       'Cédula de identidad vigente',
       'Contrato de trabajo indefinido o últimas 6 boletas (independientes)',
@@ -254,7 +223,7 @@ export default function PropertyDetailsPage() {
 
 
   const mainCharacteristics = [
-    { label: 'Tipo de Propiedad', value: `Departamento`, icon: Building2 },
+    { label: 'Tipo de Propiedad', value: `Departamento`, icon: Building2 }, // Assume 'Departamento' for now
     { label: 'Año Construcción', value: `${mockData.anoConstruccion} (Estimado)`, icon: CalendarClock },
     { label: 'Orientación', value: mockData.orientacion, icon: Compass },
     { label: 'Piso', value: property.address.number?.split(' ').find(p => !isNaN(parseInt(p))) || 'No especificado', icon: Layers },
@@ -279,7 +248,7 @@ export default function PropertyDetailsPage() {
     if (lowerAmenity.includes('estacionamiento')) return ParkingCircle;
     if (lowerAmenity.includes('pet-friendly') || lowerAmenity.includes('mascota')) return PawPrint;
     if (lowerAmenity.includes('sala de evento') || lowerAmenity.includes('quincho')) return PartyPopper;
-    if (lowerAmenity.includes('terraza')) return Sun; // Or View
+    if (lowerAmenity.includes('terraza')) return Sun; 
     if (lowerAmenity.includes('acceso controlado')) return KeyRound;
     if (lowerAmenity.includes('juego infantil')) return Puzzle;
     if (lowerAmenity.includes('lavandería')) return WashingMachine;
@@ -291,7 +260,7 @@ export default function PropertyDetailsPage() {
     if (lowerAmenity.includes('aire acondicionado')) return AirVent;
     if (lowerAmenity.includes('calefacción')) return Heater;
     if (lowerAmenity.includes('vista') || lowerAmenity.includes('panorámica')) return View;
-    return CheckCircle; // Default icon
+    return CheckCircle; 
   };
 
   const fabIcon = () => {
@@ -302,14 +271,11 @@ export default function PropertyDetailsPage() {
 
   const handleWhatsAppContact = () => {
     if (!property) return;
-
     const propertyDescription = property.title;
     const addressInfo = `${property.address.street}, ${property.address.commune}`;
-    
     const message = `Hola, solicito más detalles sobre la propiedad "${propertyDescription}" de tipología ${derivedTypology}, ubicada en ${addressInfo}. (ID: ${property.propertyId})`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_CONTACT_NUMBER}?text=${encodedMessage}`;
-    
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -317,7 +283,6 @@ export default function PropertyDetailsPage() {
   return (
     <>
       <div className="max-w-6xl mx-auto py-8 pb-28 md:pb-10">
-        {/* Breadcrumbs Section */}
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">
             <li><Link href="/properties" className="hover:text-primary">Propiedades</Link></li>
@@ -331,12 +296,10 @@ export default function PropertyDetailsPage() {
         </nav>
         
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left/Main Column (Gallery, Details) - Col span 2 on LG */}
           <div className="lg:col-span-2 space-y-8">
             
-            <section> {/* Section for Title, Favorite, and then Gallery */}
+            <section>
               <div className="flex justify-between items-start mb-2">
                 <h1 className="text-3xl font-bold tracking-tight">{displayTitle}</h1>
                 <Button variant="ghost" size="icon" onClick={toggleFavorite} title="Guardar Favorito">
@@ -344,9 +307,8 @@ export default function PropertyDetailsPage() {
                 </Button>
               </div>
 
-              {/* Multimedia Gallery Section - MOVED HERE */}
               {property.imageUrls && property.imageUrls.length > 0 && (
-                <div className="relative group mt-4"> {/* Added mt-4 for spacing from title */}
+                <div className="relative group mt-4"> 
                   <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden shadow-md">
                     <Image
                       src={currentImageUrl}
@@ -387,7 +349,7 @@ export default function PropertyDetailsPage() {
               </div>
             </section>
 
-            <section> {/* Section for Address, Key Specs, Unit Highlights */}
+            <section> 
               <div className="flex items-center text-muted-foreground mb-3">
                 <MapPin className="w-5 h-5 mr-2 text-primary" />
                 {property.address.street}{property.address.number ? `, ${property.address.number}` : ''}, {property.address.commune}
@@ -411,7 +373,6 @@ export default function PropertyDetailsPage() {
               )}
             </section>
             
-            {/* Buttons for other units/typologies */}
             <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" size="sm" disabled className="transition-all hover:shadow-sm w-full">
                     <Repeat className="mr-2 h-4 w-4" /> Ver otras unidades {derivedTypology} en {property.condominioName} (Próximamente)
@@ -521,14 +482,12 @@ export default function PropertyDetailsPage() {
                 </Card>
               </div>
             </section>
-             {/* First Payment Calculator Section */}
             <Separator className="my-8" />
             <section>
                 <FirstPaymentCalculator monthlyRent={property.price} currency={property.currency} />
             </section>
           </div>
 
-          {/* Right/Sidebar Column (Price, CTA) - Col span 1 on LG */}
           <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24 self-start">
             <Card className="shadow-lg">
               <CardContent className="p-6 space-y-4">
@@ -554,11 +513,16 @@ export default function PropertyDetailsPage() {
                       <p className="text-muted-foreground">Fecha: <span className="font-medium text-foreground">{format(new Date(scheduledVisit.date), "EEEE dd 'de' MMMM, yyyy", { locale: es })}</span></p>
                       <p className="text-muted-foreground">Hora: <span className="font-medium text-foreground">{scheduledVisit.time}</span></p>
                       <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => {
-                        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY); // Example: clear all for now
+                        const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+                        if (storedVisitsRaw) {
+                            const storedVisits = JSON.parse(storedVisitsRaw);
+                            delete storedVisits[property.propertyId];
+                            localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+                        }
                         setScheduledVisit(null);
-                        toast({title: "Visita cancelada (simulado)", description: "Puedes agendar una nueva visita."})
+                        toast({title: "Visita cancelada", description: "Puedes agendar una nueva visita si lo deseas."})
                          }}>
-                        Cancelar Visita (Simulado)
+                        Cancelar Visita
                       </Button>
                     </CardContent>
                   </Card>
@@ -611,7 +575,6 @@ export default function PropertyDetailsPage() {
         />
       )}
 
-      {/* AI Chat FAB and Sheet */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
         <SheetTrigger asChild>
           <Button
@@ -630,14 +593,12 @@ export default function PropertyDetailsPage() {
           <SheetHeader className="p-4 border-b">
             <SheetTitle>Asistente de Arriendos IA</SheetTitle>
           </SheetHeader>
-          <div className="h-[calc(100%-4.5rem)]"> {/* Ensure AIChatClient can fill this */}
+          <div className="h-[calc(100%-4.5rem)]"> 
             <AIChatClient initialContextMessage={`Tengo una consulta sobre la propiedad: "${property.title}" (ID: ${property.propertyId}) ubicada en ${property.address.commune}.`} />
           </div>
         </SheetContent>
       </Sheet>
 
-
-      {/* Fixed Bottom Bar - Only on mobile */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-3 md:p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t z-50 md:hidden">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex-1 min-w-0">
@@ -677,9 +638,3 @@ export default function PropertyDetailsPage() {
     </>
   );
 }
-
-    
-
-    
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -26,35 +27,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Timestamp } from 'firebase/firestore';
-
-
-// Mock data for landlord properties
-const mockLandlordProperties: Property[] = Array(3).fill(null).map((_, i) => ({
-  propertyId: `mylp-${i + 1}`,
-  ownerUid: `current-landlord-uid`, // Assume this matches logged in user
-  title: `Mi Unidad ${i + 1}0${i+1}`,
-  condominioName: i % 2 === 0 ? 'Condominio Sol Naciente' : 'Edificio Central Park',
-  description: 'Esta es una de mis propiedades, bien cuidada y lista para arrendar. Ubicación privilegiada y excelentes terminaciones.',
-  address: {
-    street: `Apoquindo 450${i}`,
-    commune: 'Las Condes',
-    city: 'Santiago',
-    region: 'Metropolitana',
-  },
-  price: 750000 + i * 100000,
-  currency: 'CLP',
-  bedrooms: 2 + (i % 2), // To vary typologies
-  bathrooms: 1 + (i % 2),
-  areaSqMeters: 90 + i * 10,
-  amenities: ['estacionamiento', 'bodega', 'seguridad'],
-  imageUrls: [`https://placehold.co/100x100.png?text=Mi+Unidad+${i+1}`],
-  mainImageUrl: `https://placehold.co/100x100.png?text=Mi+Unidad+${i+1}`,
-  status: i % 2 === 0 ? 'disponible' : 'arrendado',
-  createdAt: Timestamp.now(),
-  updatedAt: Timestamp.now(),
-}));
-
 
 export default function MyPropertiesPage() {
   const { userProfile, loading: authLoading } = useAuth();
@@ -74,14 +46,8 @@ export default function MyPropertiesPage() {
       const fetchMyProperties = async () => {
         setLoadingData(true);
         try {
-          // const props = await getProperties({ ownerUid: userProfile.uid });
-          // setProperties(props);
-          // Ensure mock data has the new field and filter by current-landlord-uid
-          const userSpecificMockProperties = mockLandlordProperties.map(p => ({
-            ...p,
-            ownerUid: 'current-landlord-uid' 
-          })).filter(p => p.ownerUid === 'current-landlord-uid');
-          setProperties(userSpecificMockProperties);
+          const props = await getProperties({ ownerUid: userProfile.uid });
+          setProperties(props);
         } catch (error) {
           console.error("Error fetching landlord properties:", error);
           toast({ title: "Error", description: "No se pudieron cargar tus propiedades.", variant: "destructive" });
@@ -96,21 +62,20 @@ export default function MyPropertiesPage() {
   const handleDeleteProperty = async (propertyToDelete: Property) => {
     if (!userProfile) return;
     try {
-      // First, delete images from storage (optional, handle errors gracefully)
-      // for (const imageUrl of propertyToDelete.imageUrls) {
-      //   try {
-      //     await deleteFileByUrl(imageUrl);
-      //   } catch (storageError) {
-      //     console.warn(`Could not delete image ${imageUrl} from storage:`, storageError);
-      //   }
-      // }
+      // First, delete images from storage
+      for (const imageUrl of propertyToDelete.imageUrls) {
+        try {
+          await deleteFileByUrl(imageUrl);
+        } catch (storageError) {
+          console.warn(`Could not delete image ${imageUrl} from storage:`, storageError);
+          // Decide if you want to stop deletion or continue. For now, continue.
+        }
+      }
       // Then, delete property document from Firestore
-      // await deleteProperty(propertyToDelete.propertyId);
+      await deleteProperty(propertyToDelete.propertyId);
 
-      // Mock deletion
       setProperties(prev => prev.filter(p => p.propertyId !== propertyToDelete.propertyId));
-
-      toast({ title: "Propiedad Eliminada", description: `"${propertyToDelete.title}" ha sido eliminada. (Simulado)` });
+      toast({ title: "Propiedad Eliminada", description: `"${propertyToDelete.title}" ha sido eliminada.` });
     } catch (error) {
       console.error("Error deleting property:", error);
       toast({ title: "Error", description: "No se pudo eliminar la propiedad.", variant: "destructive" });
@@ -184,8 +149,9 @@ export default function MyPropertiesPage() {
                   <TableCell>
                     <Badge variant={prop.status === 'disponible' ? 'default' : (prop.status === 'arrendado' ? 'secondary' : 'outline')}
                            className={prop.status === 'disponible' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 
-                                     (prop.status === 'arrendado' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' : '')}>
-                      {prop.status.charAt(0).toUpperCase() + prop.status.slice(1)}
+                                     (prop.status === 'arrendado' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' : 
+                                     (prop.status === 'en_revision' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' : ''))}>
+                      {prop.status.charAt(0).toUpperCase() + prop.status.slice(1).replace('_', ' ')}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -9,17 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { createProperty } from '@/lib/firebase/firestore';
 import { uploadMultipleFiles } from '@/lib/firebase/storage';
 import type { Property } from '@/types';
-import { Timestamp } from 'firebase/firestore';
-
-type PropertyFormData = Omit<Property, 'propertyId' | 'ownerUid' | 'createdAt' | 'updatedAt' | 'imageUrls' | 'mainImageUrl'> & {
-  street: string;
-  number?: string;
-  commune: string;
-  city: string;
-  region: string;
-  condominioName: string;
-};
-
 
 export default function NewPropertyPage() {
   const { userProfile } = useAuth();
@@ -50,8 +40,8 @@ export default function NewPropertyPage() {
       const propertyData: Omit<Property, 'propertyId' | 'createdAt' | 'updatedAt'> = {
         ownerUid: userProfile.uid,
         title: data.title,
-        description: data.description,
         condominioName: data.condominioName,
+        description: data.description,
         address: {
           street: data.street,
           number: data.number,
@@ -68,21 +58,13 @@ export default function NewPropertyPage() {
         imageUrls,
         mainImageUrl: imageUrls[0], // First image as main
         status: data.status,
-        // createdAt and updatedAt will be set by serverTimestamp in createProperty
+        // virtualTourUrl can be added if part of the form
       };
       
-      // Forcing type assertion to match Property for createProperty
-      const finalPropertyData = {
-        ...propertyData,
-        // Ensure all fields expected by Omit<Property, 'propertyId' | 'createdAt' | 'updatedAt'> are present
-        // Some fields like virtualTourUrl can be optional
-      } as Omit<Property, 'propertyId' | 'createdAt' | 'updatedAt'>;
-
-
-      const propertyId = await createProperty(finalPropertyData);
+      const propertyId = await createProperty(propertyData);
       
       toast({ title: 'Propiedad Publicada', description: 'Tu propiedad ha sido creada exitosamente.' });
-      router.push(`/dashboard/landlord/properties`); // Or to the new property's page: /properties/${propertyId}
+      router.push(`/dashboard/landlord/properties`); 
     } catch (error: any) {
       console.error("Error creating property:", error);
       toast({ title: 'Error al Publicar', description: error.message || 'No se pudo crear la propiedad.', variant: 'destructive' });

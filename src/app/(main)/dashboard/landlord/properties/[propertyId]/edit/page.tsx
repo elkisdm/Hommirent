@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,38 +11,6 @@ import { getPropertyById, updateProperty } from '@/lib/firebase/firestore';
 import { uploadMultipleFiles, deleteFileByUrl } from '@/lib/firebase/storage';
 import type { Property } from '@/types';
 import { Spinner } from '@/components/ui/spinner';
-import { Timestamp } from 'firebase/firestore';
-
-// Mock data for editing
-const mockEditableProperty: Property = {
-  propertyId: 'prop-edit-1',
-  ownerUid: 'current-landlord-uid', // Should match logged-in user for edit access
-  title: 'Departamento Remodelado en Ñuñoa',
-  condominioName: 'Edificio Las Palmas',
-  description: 'Acogedor departamento recién remodelado, con excelente conectividad y cercano a Plaza Ñuñoa. Cuenta con termopanel y piso flotante nuevo.',
-  address: {
-    street: 'Jorge Washington 123',
-    number: 'Depto 22B',
-    commune: 'Ñuñoa',
-    city: 'Santiago',
-    region: 'Metropolitana',
-  },
-  price: 620000,
-  currency: 'CLP',
-  bedrooms: 2,
-  bathrooms: 2,
-  areaSqMeters: 75,
-  amenities: ['estacionamiento', 'bodega', 'bicicletero'],
-  imageUrls: [
-    'https://placehold.co/600x400.png?text=Ñuñoa+Edit+1',
-    'https://placehold.co/600x400.png?text=Ñuñoa+Edit+2',
-  ],
-  mainImageUrl: 'https://placehold.co/600x400.png?text=Ñuñoa+Edit+1',
-  status: 'disponible',
-  createdAt: Timestamp.now(),
-  updatedAt: Timestamp.now(),
-};
-
 
 export default function EditPropertyPage() {
   const { userProfile } = useAuth();
@@ -59,9 +28,7 @@ export default function EditPropertyPage() {
     const fetchPropertyData = async () => {
       setIsFetching(true);
       try {
-        // const property = await getPropertyById(propertyId);
-        // Forcing mock to include new field for consistency, actual ownerUid check should be dynamic
-        const property = {...mockEditableProperty, ownerUid: userProfile?.uid || 'mock-owner-uid-placeholder'}; 
+        const property = await getPropertyById(propertyId);
         if (property && property.ownerUid === userProfile?.uid) { 
              setInitialData(property);
         } else if (property && property.ownerUid !== userProfile?.uid) {
@@ -82,8 +49,10 @@ export default function EditPropertyPage() {
 
     if (userProfile) { 
         fetchPropertyData();
+    } else if (!userProfile && !isFetching) { // If user is not logged in after initial check
+        router.push('/login');
     }
-  }, [propertyId, userProfile, router, toast]);
+  }, [propertyId, userProfile, router, toast, isFetching]);
 
   const handleSubmit = async (
     data: any, // Type from PropertyFormValues
@@ -99,17 +68,18 @@ export default function EditPropertyPage() {
     try {
       let newImageUrls: string[] = [];
       if (files && files.length > 0) {
-        newImageUrls = await uploadMultipleFiles(files, `properties/${userProfile.uid}`);
+        newImageUrls = await uploadMultipleFiles(files, `properties/${userProfile.uid}/${propertyId}`);
       }
       
-      // Delete removed images from storage
-      // for (const urlToDelete of removedImageUrls) {
-      //   try {
-      //     await deleteFileByUrl(urlToDelete);
-      //   } catch (storageError) {
-      //     console.warn(`Could not delete image ${urlToDelete} from storage:`, storageError);
-      //   }
-      // }
+      for (const urlToDelete of removedImageUrls) {
+        if (initialData.imageUrls.includes(urlToDelete)) { // Ensure we only try to delete images that were part of the initial data
+          try {
+            await deleteFileByUrl(urlToDelete);
+          } catch (storageError) {
+            console.warn(`Could not delete image ${urlToDelete} from storage:`, storageError);
+          }
+        }
+      }
 
       const finalImageUrls = [...initialData.imageUrls.filter(url => !removedImageUrls.includes(url)), ...newImageUrls];
       
@@ -118,7 +88,6 @@ export default function EditPropertyPage() {
           setIsLoading(false);
           return;
       }
-
 
       const updatedPropertyData: Partial<Property> = {
         title: data.title,
@@ -130,7 +99,7 @@ export default function EditPropertyPage() {
           commune: data.commune,
           city: data.city,
           region: data.region,
-          coordinates: initialData.address.coordinates, // Keep existing or update if form allows
+          coordinates: initialData.address.coordinates, 
         },
         price: data.price,
         currency: data.currency,
@@ -139,13 +108,12 @@ export default function EditPropertyPage() {
         areaSqMeters: data.areaSqMeters,
         amenities: data.amenities,
         imageUrls: finalImageUrls,
-        mainImageUrl: finalImageUrls[0],
+        mainImageUrl: finalImageUrls[0] || '', // Ensure mainImageUrl is not empty
         status: data.status,
-        // updatedAt will be set by serverTimestamp in updateProperty
+        // virtualTourUrl can be added if part of the form
       };
       
-      // await updateProperty(propertyId, updatedPropertyData);
-      console.log("Property updated (simulated):", propertyId, updatedPropertyData);
+      await updateProperty(propertyId, updatedPropertyData);
       
       toast({ title: 'Propiedad Actualizada', description: 'Los cambios en tu propiedad han sido guardados.' });
       router.push(`/dashboard/landlord/properties`);

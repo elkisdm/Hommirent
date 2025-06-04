@@ -25,9 +25,6 @@ import { useRouter } from 'next/navigation';
 import type { Property } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/spinner';
-// Firebase functions would be imported here if this component handled submission directly
-// import { createProperty, updateProperty } from '@/lib/firebase/firestore';
-// import { uploadMultipleFiles, deleteFileByUrl } from '@/lib/firebase/storage';
 import { Timestamp } from 'firebase/firestore';
 
 const propertyFormSchema = z.object({
@@ -83,7 +80,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
     resolver: zodResolver(propertyFormSchema),
     defaultValues: initialData ? {
         title: initialData.title,
-        condominioName: initialData.condominioName,
+        condominioName: initialData.condominioName || '',
         description: initialData.description,
         street: initialData.address.street,
         number: initialData.address.number,
@@ -98,10 +95,21 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
         amenities: initialData.amenities,
         status: initialData.status,
     } : {
+      title: '',
+      condominioName: '',
+      description: '',
+      street: '',
+      number: '',
+      commune: '',
+      city: 'Santiago', // Default city
+      region: 'Metropolitana', // Default region
+      price: 0,
       currency: 'CLP',
+      bedrooms: 0,
+      bathrooms: 0,
+      areaSqMeters: 0,
       status: 'disponible',
       amenities: [],
-      condominioName: '',
     },
   });
 
@@ -110,8 +118,12 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
       toast({ title: 'Error', description: 'No tienes permiso para realizar esta acción.', variant: 'destructive' });
       return;
     }
-    if (!selectedFiles && !initialData?.imageUrls?.length && existingImageUrls.length === 0) {
-        toast({ title: 'Imágenes requeridas', description: 'Debes subir al menos una imagen de la propiedad.', variant: 'destructive'});
+    // Check if there are new files OR existing images that are NOT in the removedImageUrls list
+    const hasNewFiles = selectedFiles && selectedFiles.length > 0;
+    const remainingExistingImages = existingImageUrls.filter(url => !removedImageUrls.includes(url));
+    
+    if (!hasNewFiles && remainingExistingImages.length === 0 && !initialData?.imageUrls?.some(url => !removedImageUrls.includes(url))) {
+        toast({ title: 'Imágenes requeridas', description: 'Debes subir o mantener al menos una imagen de la propiedad.', variant: 'destructive'});
         return;
     }
     await onSubmitForm(values, selectedFiles, removedImageUrls);
@@ -135,7 +147,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           render={({ field }) => (
             <FormItem>
               <FormLabel>Título de la Propiedad / Unidad</FormLabel>
-              <FormControl><Input placeholder="Ej: Departamento 305B" {...field} /></FormControl>
+              <FormControl><Input placeholder="Ej: Departamento 305B, Casa con Jardín" {...field} /></FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -147,7 +159,8 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre del Proyecto / Edificio</FormLabel>
-              <FormControl><Input placeholder="Ej: Edificio Central Park" {...field} /></FormControl>
+              <FormControl><Input placeholder="Ej: Edificio Central Park, Condominio Las Flores" {...field} /></FormControl>
+              <FormDescription>Si es una casa individual, puedes repetir el título o la dirección aquí.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -169,7 +182,7 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
             <FormLabel>Dirección del Proyecto / Edificio</FormLabel>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="street" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Calle</FormLabel><FormControl><Input placeholder="Av. Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField control={form.control} name="number" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Número (Opcional)</FormLabel><FormControl><Input placeholder="123" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField control={form.control} name="number" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Número / Depto (Opcional)</FormLabel><FormControl><Input placeholder="123, Depto 4B" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={form.control} name="commune" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Comuna</FormLabel><FormControl><Input placeholder="Providencia" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={form.control} name="city" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Ciudad</FormLabel><FormControl><Input placeholder="Santiago" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField control={form.control} name="region" render={({ field }) => ( <FormItem><FormLabel className="text-xs">Región</FormLabel><FormControl><Input placeholder="Metropolitana" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -261,4 +274,3 @@ export function PropertyForm({ initialData, onSubmitForm, isLoading }: PropertyF
     </Form>
   );
 }
-

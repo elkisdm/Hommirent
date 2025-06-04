@@ -247,50 +247,125 @@ export function VisitRequestDialog({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
               {currentStep === 1 && (
                 <>
-                  <FormField control={form.control} name="firstName" render={({ field }) => ( <FormItem> <FormLabel>Nombre</FormLabel> <FormControl> <div className="relative"> <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: Juan" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
-                  <FormField control={form.control} name="lastName" render={({ field }) => ( <FormItem> <FormLabel>Apellido</FormLabel> <FormControl> <div className="relative"> <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: Pérez" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
-                  <FormField control={form.control} name="rut" render={({ field }) => ( <FormItem> <FormLabel>RUT</FormLabel> <FormControl> <div className="relative"> <Fingerprint className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input placeholder="Ej: 12345678-9" {...field} onChange={handleRutInputChange} value={field.value} className="pl-10" maxLength={10} /> </div> </FormControl> <FormMessage /> </FormItem> )} />
-                  <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Número de Celular</FormLabel> <FormControl> <div className="relative"> <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input type="tel" placeholder="Ej: +56912345678" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
-                  <FormField control={form.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Correo Electrónico</FormLabel> <FormControl> <div className="relative"> <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /> <Input type="email" placeholder="tu@email.com" {...field} className="pl-10" /> </div> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField
+ control={form.control}
+ name="firstName"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>Nombre</FormLabel>
+ <FormControl>
+ <div className="relative">
+ <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <Input placeholder="Ej: Juan" {...field} className="pl-10" />
+ </div>
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
+                  <FormField
+ control={form.control}
+ name="lastName"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>Apellido</FormLabel>
+ <FormControl>
+ <div className="relative">
+ <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <Input placeholder="Ej: Pérez" {...field} className="pl-10" />
+ </div>
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
+                  <FormField
+ control={form.control}
+ name="rut"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>RUT</FormLabel>
+ <FormControl>
+ <div className="relative">
+ <Fingerprint className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <Input placeholder="Ej: 12345678-9" {...field} onChange={handleRutInputChange} value={field.value} className="pl-10" maxLength={10} />
+ </div>
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
+                  <FormField
+ control={form.control}
+ name="phone"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>Número de Celular</FormLabel>
+ <FormControl>
+ <div className="relative">
+ <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <Input type="tel" placeholder="Ej: +56912345678" {...field} className="pl-10" />
+ </div>
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
+                  <FormField
+ control={form.control}
+ name="email"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>Correo Electrónico</FormLabel>
+ <FormControl>
+ <div className="relative">
+ <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+ <Input type="email" placeholder="tu@email.com" {...field} className="pl-10" />
+ </div>
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
                 </>
               )}
 
               {currentStep === 2 && (
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Date Capsule Picker */}
-                  <div className="md:w-1/2 lg:w-2/5 space-y-3">
-                    <FormLabel className="block">Fecha de Visita</FormLabel>
-                     <div className="flex overflow-x-auto space-x-2 pb-2 custom-scrollbar-thin -ml-1 pl-1">
+ <div className="md:w-1/2 lg:w-2/5 space-y-3">
+ <FormLabel className="block">Fecha de Visita</FormLabel>
+ <div className="flex overflow-x-auto space-x-2 pb-2 custom-scrollbar-thin -ml-1 pl-1">
                       {selectableDates.map((date) => (
-                        <Button
-                          key={date.toISOString()}
-                          type="button"
-                          variant={selectedDate && isSameDay(selectedDate, date) ? 'default' : 'outline'}
-                          onClick={() => {
-                            form.setValue('visitDate', date, { shouldValidate: true });
-                          }}
-                          className="flex flex-col items-center justify-center p-2.5 h-auto min-w-[64px] rounded-lg shadow-sm flex-shrink-0"
-                        >
-                          <span className="text-xs uppercase font-medium">
+ <Button
+ key={date.toISOString()}
+ type="button"
+ variant={selectedDate && isSameDay(selectedDate, date) ? 'default' : 'outline'}
+ onClick={() => {
+ form.setValue('visitDate', date, { shouldValidate: true });
+ }}
+ className="flex flex-col items-center justify-center p-2.5 h-auto min-w-[64px] rounded-lg shadow-sm flex-shrink-0"
+ >
+ <span className="text-xs uppercase font-medium">
                             {format(date, 'E', { locale: es })}
-                          </span>
-                          <span className="text-xl font-bold block my-0.5">
+ </span>
+ <span className="text-xl font-bold block my-0.5">
                             {format(date, 'd', { locale: es })}
-                          </span>
-                          <span className="text-xs uppercase font-medium text-muted-foreground">
+ </span>
+ <span className="text-xs uppercase font-medium text-muted-foreground">
                             {format(date, 'MMM', { locale: es })}
-                          </span>
-                        </Button>
+ </span>
+ </Button>
                       ))}
+ </div>
+ <FormField
+ control={form.control}
+ name="visitDate"
+ render={() => ( <FormItem className="h-0 !mt-0 invisible"><FormMessage /></FormItem>)} // For error display
+ />
                     </div>
-                    <FormField
-                      control={form.control}
-                      name="visitDate"
-                      render={() => ( <FormItem className="h-0 !mt-0 invisible"><FormMessage /></FormItem>)} // For error display
-                    />
-                  </div>
-                  
-                  {/* Time Slot Picker */}
+
+ {/* Time Slot Picker */}
                   <div className="flex-1 md:w-1/2 lg:w-3/5">
                     {selectedDate ? (
                       <>

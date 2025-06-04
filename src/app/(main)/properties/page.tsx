@@ -20,88 +20,6 @@ import { PropertyCard } from '@/components/properties/PropertyCard';
 import { Separator } from '@/components/ui/separator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
-// Mock data for now, replace with Firestore fetching
-const mockProperties: Property[] = [
-  {
-    propertyId: `prop-condo1-tip1-1`,
-    ownerUid: `owner-1`,
-    title: `Unidad 101 Elegante`, // Simplified title for row display
-    condominioName: 'Las Torres de Vitacura',
-    description: 'Acogedora unidad en primer piso, ideal para parejas, con terminaciones de lujo.',
-    address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
-    price: 500000, currency: 'CLP', bedrooms: 2, bathrooms: 1, areaSqMeters: 60,
-    amenities: ['estacionamiento', 'bodega', 'conserjeria', 'piscina', 'gimnasio equipado', 'salon gourmet'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Torres+2D1B+A`, `https://placehold.co/600x400.png?text=Torres+Living+A`, `https://placehold.co/600x400.png?text=Torres+Piscina`, `https://placehold.co/600x400.png?text=Torres+Gimnasio`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+2D1B+A`,
-    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-  {
-    propertyId: `prop-condo1-tip1-2`,
-    ownerUid: `owner-2`,
-    title: `Estudio Moderno 201`,
-    condominioName: 'Las Torres de Vitacura',
-    description: 'Luminosa unidad con vista despejada. Moderno Estudio, perfecto para profesionales jovenes.',
-    address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
-    price: 380000, currency: 'CLP', bedrooms: 0, bathrooms: 1, areaSqMeters: 35,
-    amenities: ['estacionamiento', 'balcon', 'piscina temperada', 'seguridad 24/7'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Torres+Estudio+B`, `https://placehold.co/600x400.png?text=Torres+Cocina+B`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+Estudio+B`,
-    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-  {
-    propertyId: `prop-condo1-tip2-1`,
-    ownerUid: `owner-3`,
-    title: `Departamento Familiar 305`,
-    condominioName: 'Las Torres de Vitacura',
-    description: 'Amplia unidad familiar con terraza panorámica y excelente distribución interior.',
-    address: { street: `Av. Los Leones 120`, commune: 'Providencia', city: 'Santiago', region: 'Metropolitana' },
-    price: 650000, currency: 'CLP', bedrooms: 3, bathrooms: 2, areaSqMeters: 85,
-    amenities: ['estacionamiento', 'bodega', 'piscina', 'terraza', 'gimnasio', 'sala de juegos'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Torres+3D2B+C`, `https://placehold.co/600x400.png?text=Torres+Dormitorio+C`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Torres+3D2B+C`,
-    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-  {
-    propertyId: `prop-condo2-tip1-1`,
-    ownerUid: `owner-4`,
-    title: `Loft Urbano 50A`,
-    condominioName: 'Central Park Residences',
-    description: 'Moderno Loft perfecto para profesionales, con acceso a metro y servicios.',
-    address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
-    price: 450000, currency: 'CLP', bedrooms: 1, bathrooms: 1, areaSqMeters: 50,
-    amenities: ['gimnasio', 'sala multiuso', 'lavanderia', 'quincho con vista', 'cowork'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Central+Loft+D`, `https://placehold.co/600x400.png?text=Central+Gym+D`, `https://placehold.co/600x400.png?text=Central+Quincho`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Central+Loft+D`,
-    status: 'arrendado', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-  {
-    propertyId: `prop-condo2-tip2-1`,
-    ownerUid: `owner-5`,
-    title: `Departamento Ejecutivo 80C`,
-    condominioName: 'Central Park Residences',
-    description: 'Departamento con excelente distribución y luz natural, ideal para ejecutivos.',
-    address: { street: `Av. Libertador 300`, commune: 'Santiago Centro', city: 'Santiago', region: 'Metropolitana' },
-    price: 580000, currency: 'CLP', bedrooms: 2, bathrooms: 2, areaSqMeters: 70,
-    amenities: ['estacionamiento', 'gimnasio', 'piscina', 'quincho', 'seguridad', 'sala de cine'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Central+2D2B+E`, `https://placehold.co/600x400.png?text=Central+Piscina+E`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Central+2D2B+E`,
-    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-   {
-    propertyId: `prop-condo3-tip4-1`,
-    ownerUid: `owner-6`,
-    title: `Casa Familiar Grande con Jardín`,
-    condominioName: 'Valle Escondido Lo Curro',
-    description: 'Espaciosa casa en Las Condes con gran jardín privado y piscina, seguridad y tranquilidad.',
-    address: { street: `Valle Escondido 700`, commune: 'Las Condes', city: 'Santiago', region: 'Metropolitana' },
-    price: 1200000, currency: 'CLP', bedrooms: 4, bathrooms: 3, areaSqMeters: 220,
-    amenities: ['estacionamiento x2', 'jardin amplio', 'piscina privada', 'seguridad 24hrs', 'club house'],
-    imageUrls: [`https://placehold.co/800x600.png?text=Valle+4D3B+F`, `https://placehold.co/600x400.png?text=Valle+Jardin+F`],
-    mainImageUrl: `https://placehold.co/800x600.png?text=Valle+4D3B+F`,
-    status: 'disponible', createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
-  },
-];
-
 interface TypologyGroup {
   typologyKey: string;
   typologyName: string; // Abbreviated name for display e.g., "2D - 1B"
@@ -167,19 +85,14 @@ export default function PropertiesPage() {
       setLoading(true);
       setLoadingFeatured(true);
       try {
-        // Simulating API call for all properties (status 'disponible')
-        // const mainProps = await getProperties({ status: 'disponible' });
-        const mainProps = mockProperties.filter(p => p.status === 'disponible');
+        const mainProps = await getProperties({ status: 'disponible' });
         setAllProperties(mainProps);
 
-        // Simulating API call for featured properties (e.g., limit 3, or based on some criteria)
-        // const featured = await getProperties({ status: 'disponible', count: 3 });
-        const featured = mockProperties.filter(p => p.status === 'disponible' && p.price > 500000).slice(0, 3);
-        setFeaturedProperties(featured.length > 0 ? featured : mainProps.slice(0,3)); // Fallback if no "expensive" featured
+        const featured = await getProperties({ status: 'disponible', count: 3 }); // Example: get 3 featured
+        setFeaturedProperties(featured.length > 0 ? featured : mainProps.slice(0, Math.min(3, mainProps.length)));
 
       } catch (error) {
         console.error("Error fetching properties: ", error);
-        // TODO: Add user-facing error handling (e.g., toast notification)
       } finally {
         setLoading(false);
         setLoadingFeatured(false);
@@ -221,11 +134,11 @@ export default function PropertiesPage() {
 
     if (priceRangeFilter) {
       const [min, max] = priceRangeFilter.split('-').map(Number);
-      if (priceRangeFilter.endsWith('-')) { // Handles "2000000-"
+      if (priceRangeFilter.endsWith('-')) { 
           if (!isNaN(min)) filtered = filtered.filter(p => p.price >= min);
       } else if (!isNaN(min) && !isNaN(max)) {
         filtered = filtered.filter(p => p.price >= min && p.price <= max);
-      } else if (!isNaN(min)) { // Should not happen if ranges are well defined
+      } else if (!isNaN(min)) { 
         filtered = filtered.filter(p => p.price >= min);
       }
     }
@@ -241,7 +154,6 @@ export default function PropertiesPage() {
 
       const details = condominioDetailsMap.get(property.condominioName)!;
       if (property.mainImageUrl) details.images.add(property.mainImageUrl);
-      // Only add a few more unique images to avoid too many thumbnails
       for (let i=0; i < property.imageUrls.length && details.images.size < 4; i++) {
          details.images.add(property.imageUrls[i]);
       }
@@ -285,7 +197,7 @@ export default function PropertiesPage() {
             return getSortValue(a.typologyKey) - getSortValue(b.typologyKey);
           }),
           condominioImageUrls: uniqueImageUrls.length > 0 ? uniqueImageUrls : [`https://placehold.co/800x600.png?text=${encodeURIComponent(condominioName)}`],
-          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 5), // Show up to 5 amenities
+          condominioAmenities: Array.from(condoDetails.amenities).slice(0, 5), 
           condominioPromotions: condominioName.toLowerCase().includes("park") || condominioName.toLowerCase().includes("residences")
             ? [{ text: "1er Mes con Descuento", icon: Gift, variant: "default" }, {text: "GGCC gratis x 3 meses", icon: Star, variant: "secondary"}]
             : (condominioName.toLowerCase().includes("torres") ? [{text: "Tour virtual disponible", icon: PlayCircle, variant: "outline"}] : []),
@@ -336,7 +248,7 @@ export default function PropertiesPage() {
 
       <section>
         <h2 className="text-3xl font-semibold tracking-tight mb-6 text-heading-foreground">Busca y Filtra Propiedades</h2>
-        <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30 sticky top-[calc(var(--header-height,64px)+1rem)] z-40"> {/* Adjust top based on header height */}
+        <div className="bg-card/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border/30 sticky top-[calc(var(--header-height,64px)+1rem)] z-40">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div className="space-y-1 lg:col-span-2">
               <label htmlFor="search" className="text-sm font-medium text-muted-foreground">Palabra Clave</label>
@@ -355,7 +267,6 @@ export default function PropertiesPage() {
                   <SelectValue placeholder="Todas las comunas" />
                 </SelectTrigger>
                 <SelectContent>
-                  
                   {santiagoMetropolitanCommunes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -367,7 +278,6 @@ export default function PropertiesPage() {
                   <SelectValue placeholder="Cualquier tipología" />
                 </SelectTrigger>
                 <SelectContent>
-                  
                   <SelectItem value="0">Estudio</SelectItem>
                   <SelectItem value="1">1 Dormitorio</SelectItem>
                   <SelectItem value="2">2 Dormitorios</SelectItem>
@@ -384,7 +294,6 @@ export default function PropertiesPage() {
                   <SelectValue placeholder="Cualquier rango" />
                 </SelectTrigger>
                 <SelectContent>
-                  
                   <SelectItem value="0-500000">$0 - $500.000</SelectItem>
                   <SelectItem value="500000-800000">$500.000 - $800.000</SelectItem>
                   <SelectItem value="800000-1200000">$800.000 - $1.200.000</SelectItem>
@@ -393,15 +302,6 @@ export default function PropertiesPage() {
                 </SelectContent>
               </Select>
             </div>
-            {/* 
-            <Button
-              className="w-full lg:w-auto text-base py-3 h-auto"
-              onClick={() => {}}
-              size="lg"
-            >
-              <Search className="mr-2 h-5 w-5" /> Aplicar Filtros
-            </Button>
-            */}
           </div>
         </div>
       </section>
@@ -426,7 +326,7 @@ export default function PropertiesPage() {
                         fill
                         style={{objectFit:"cover"}}
                         data-ai-hint="modern apartment building"
-                        priority
+                        priority={groupedProperties.indexOf(condominio) < 2} // Prioritize first few images
                         className="transition-transform duration-500 ease-in-out hover:scale-105"
                       />
                     </AspectRatio>
@@ -550,4 +450,3 @@ export default function PropertiesPage() {
     </div>
   );
 }
-
