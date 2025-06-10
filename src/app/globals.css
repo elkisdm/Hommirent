@@ -16,50 +16,50 @@ h1, h2, h3, h4, h5, h6 {
 
 @layer base {
   :root {
-    /* Dark Theme (Default) */
-    --background: 224 71% 4%; /* Very dark blue for elements if needed */
+    /* Dark Theme (Default) - Refined for serious and minimalist look */
+    --background: 220 40% 5%; /* Very Dark Blue/Almost Black: #050B0F */
     --foreground: 210 40% 98%; /* Almost white for text */
     --heading-foreground: 0 0% 100%; /* Pure white for headings */
 
     /* Gradient for Dark Theme Body */
     --gradient-start: 190 100% 14%; /* dark teal/blue: #003B46 */
-    --gradient-end: 277 82% 31%;   /* darker purple: #4A148C */
+    --gradient-end: 220 50% 12%;   /* Dark Slate Blue-ish: #0F1C2D */
     --body-background-image: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
     --body-background-color: hsl(var(--background)); /* Fallback */
     
-    --card: 224 71% 10%;       /* Dark blue, for solid card bg before opacity in component */
+    --card: 220 30% 12%;       /* Dark Grayish Blue for cards: #121A23 */
     --card-foreground: 210 40% 95%; 
 
-    --popover: 224 71% 9%;     /* Darker popover bg */
+    --popover: 220 30% 11%;     /* Slightly darker than card for popovers: #101820 */
     --popover-foreground: 210 40% 96%;
 
     /* PRD Primary: Teal (#0A7E8C) -> hsl(187, 87%, 27%) */
     --primary: 187 87% 27%;
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    /* Using a bright cyan for secondary as a cool contrast */
-    --secondary: 200 80% 55%; 
-    --secondary-foreground: 224 71% 10%; 
+    /* Refined Secondary: Darker, desaturated teal */
+    --secondary: 187 60% 20%; /* #144D53 */
+    --secondary-foreground: 200 50% 90%; /* Very light cyan/white: #D9F2FA */
 
-    --muted: 224 71% 15%;         
-    --muted-foreground: 210 40% 70%; 
+    --muted: 220 15% 18%; /* Dark Gray: #252A31 */       
+    --muted-foreground: 210 40% 70%; /* Light Gray */
 
     /* PRD Accent: Mustard Yellow (#D1AC00) -> hsl(50, 100%, 41%) */
     --accent: 50 100% 41%;     
     --accent-foreground: 0 0% 10%; /* Dark text on mustard yellow for contrast */
     
     /* Kept from previous theme if needed for specific elements, but main accent is now yellow */
-    --accent-purple: 260 80% 60%; /* old accent, renamed */
+    --accent-purple: 260 80% 60%; 
     --accent-purple-foreground: 0 0% 100%;
     --accent-orange: 28 90% 53%; 
     --accent-gold: 45 100% 50%;
 
 
-    --destructive: 0 75% 55%; 
+    --destructive: 0 70% 50%; /* Slightly less bright red: #E03131 */
     --destructive-foreground: 0 0% 100%; 
 
-    --border: 224 71% 20%; /* For solid border before opacity in component */
-    --input: 224 71% 12%;  /* For solid input bg before opacity in component */
+    --border: 220 25% 22%; /* Dark Gray-Blue border for glassy elements: #293240 */
+    --input: 220 20% 15%;  /* Dark Gray-Blue input bg for glassy elements: #1E242B */
     --input-border-focus: hsl(var(--primary)); 
     --ring: hsl(var(--primary)); 
 
@@ -71,8 +71,8 @@ h1, h2, h3, h4, h5, h6 {
 
     --radius: 0.75rem; 
 
-    /* Sidebar Variables - Dark Theme */
-    --sidebar-background: hsl(var(--gradient-end)); 
+    /* Sidebar Variables - Dark Theme (can be same as main dark theme if sidebar is not distinctly styled) */
+    --sidebar-background: hsl(var(--gradient-end)); /* Using gradient end for sidebar */
     --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
@@ -88,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
     --foreground: 220 25% 20%; /* Dark Gray for text */
     --heading-foreground: 220 30% 10%; /* Near Black for headings */
 
-    --body-background-image: none;
+    --body-background-image: none; /* Solid color for light theme body */
     --body-background-color: hsl(var(--background));
     
     --card: 0 0% 100%; /* White cards */
@@ -132,7 +132,7 @@ h1, h2, h3, h4, h5, h6 {
     --chart-5: 110 60% 50%;
 
     /* Sidebar Variables - Light Theme */
-    --sidebar-background: 0 0% 97%;
+    --sidebar-background: 0 0% 97%; /* Example: slightly off-white for light sidebar */
     --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
@@ -168,3 +168,4 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary));
 }
+
