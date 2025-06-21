@@ -19,6 +19,8 @@ import { Timestamp } from 'firebase/firestore';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import { Separator } from '@/components/ui/separator';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { santiagoMetropolitanCommunes } from '@/lib/communes';
+import { getTypologyKey, getAbbreviatedTypologyLabel, formatPrice } from '@/lib/propertyUtils';
 
 interface TypologyGroup {
   typologyKey: string;
@@ -41,19 +43,6 @@ interface CondominioGroup {
   address?: Property['address'];
 }
 
-const santiagoMetropolitanCommunes: string[] = [
-  "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central",
-  "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana",
-  "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú",
-  "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura",
-  "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura",
-  "Puente Alto", "Pirque", "San José de Maipo",
-  "San Bernardo", "Buin", "Calera de Tango", "Paine",
-  "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro",
-  "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor",
-  "Colina", "Lampa", "Tiltil"
-].sort();
-
 
 export default function PropertiesPage() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -67,17 +56,7 @@ export default function PropertiesPage() {
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
-  const getTypologyKey = (property: Property): string => `${property.bedrooms}D-${property.bathrooms}B`;
-
-  const getAbbreviatedTypologyLabel = (bedrooms: number, bathrooms: number): string => {
-    const bedLabel = bedrooms === 0 ? "Estudio" : (bedrooms === 1 ? `${bedrooms} Dorm.` : `${bedrooms} Dorms.`);
-    const bathLabel = bathrooms === 1 ? `${bathrooms} Baño` : `${bathrooms} Baños`;
-    return `${bedLabel} - ${bathLabel}`;
-  };
-
-  const formatPrice = (price: number, currency: string) => {
-    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: currency }).format(price);
-  };
+  // Helper utilities imported from '@/lib/propertyUtils'
 
 
   useEffect(() => {
