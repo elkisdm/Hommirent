@@ -2,7 +2,8 @@
 import { db } from './config';
 import { 
   collection, 
-  addDoc, 
+  addDoc,
+  setDoc,
   getDoc, 
   getDocs, 
   doc, 
@@ -16,9 +17,10 @@ import {
   Timestamp, // Import Timestamp
   type GeoPoint
 } from 'firebase/firestore';
-import type { Property } from '@/types';
+import type { Property, ScheduledVisit } from '@/types';
 
 const PROPERTIES_COLLECTION = 'properties';
+const SCHEDULED_VISITS_COLLECTION = 'scheduledVisits';
 
 // --- START OF MOCK DATA ---
 const mockProperties: Property[] = [
@@ -270,4 +272,40 @@ export const updateProperty = async (propertyId: string, data: Partial<Property>
 export const deleteProperty = async (propertyId: string): Promise<void> => {
   const docRef = doc(db, PROPERTIES_COLLECTION, propertyId);
   await deleteDoc(docRef);
+};
+
+// ----- Scheduled Visits -----
+
+export const saveScheduledVisit = async (
+  userUid: string,
+  propertyId: string,
+  data: Omit<ScheduledVisit, 'visitId' | 'userUid' | 'propertyId' | 'createdAt'>
+): Promise<void> => {
+  const visitRef = doc(db, SCHEDULED_VISITS_COLLECTION, `${userUid}_${propertyId}`);
+  await setDoc(visitRef, {
+    userUid,
+    propertyId,
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+};
+
+export const getScheduledVisit = async (
+  userUid: string,
+  propertyId: string
+): Promise<ScheduledVisit | null> => {
+  const visitRef = doc(db, SCHEDULED_VISITS_COLLECTION, `${userUid}_${propertyId}`);
+  const snap = await getDoc(visitRef);
+  if (snap.exists()) {
+    return { visitId: snap.id, ...(snap.data() as Omit<ScheduledVisit, 'visitId'>) };
+  }
+  return null;
+};
+
+export const deleteScheduledVisit = async (
+  userUid: string,
+  propertyId: string
+): Promise<void> => {
+  const visitRef = doc(db, SCHEDULED_VISITS_COLLECTION, `${userUid}_${propertyId}`);
+  await deleteDoc(visitRef);
 };
