@@ -47,3 +47,13 @@ export interface Interest {
   status: 'pendiente' | 'contactado';
   createdAt: Timestamp;
 }
+
+export interface ScheduledVisit {
+  visitId: string;
+  propertyId: string;
+  userUid: string;
+  propertyTitle: string;
+  date: Timestamp;
+  time: string;
+  createdAt: Timestamp;
+}

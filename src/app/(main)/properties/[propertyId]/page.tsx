@@ -17,8 +17,9 @@ import {
   Repeat, Bot, Waves, Dumbbell, Bike, ArrowUpDown, Trees, Dog, PawPrint, PartyPopper, KeyRound, Puzzle, Leaf, Speaker, Tv, Wifi, Utensils, Sofa, AirVent, Package, MountainSnow, Sun, View, Lightbulb, MessageCircleQuestion,
 } from 'lucide-react';
 import type { Property } from '@/types';
-import { getPropertyById } from '@/lib/firebase/firestore'; // Import Firestore function
+import { getPropertyById, saveScheduledVisit, getScheduledVisit, deleteScheduledVisit } from '@/lib/firebase/firestore';
 import { Timestamp } from 'firebase/firestore';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -59,6 +60,7 @@ export default function PropertyDetailsPage() {
 
 
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -88,27 +90,46 @@ export default function PropertyDetailsPage() {
       }
     };
 
-    fetchProperty();
-
-    const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
-    if (storedVisitsRaw) {
-      try {
-        const storedVisits = JSON.parse(storedVisitsRaw);
-        if (storedVisits[propertyId]) {
-          setScheduledVisit(storedVisits[propertyId]);
-        } else {
-          setScheduledVisit(null);
+    const loadVisit = async () => {
+      if (currentUser) {
+        try {
+          const visit = await getScheduledVisit(currentUser.uid, propertyId);
+          if (visit) {
+            setScheduledVisit({
+              date: visit.date.toDate().toISOString(),
+              time: visit.time,
+              propertyTitle: visit.propertyTitle,
+            });
+            return;
+          }
+        } catch (err) {
+          console.error('Error fetching scheduled visit from Firestore', err);
         }
-      } catch (e) {
-        console.error("Error parsing scheduled visits from localStorage", e);
-        setScheduledVisit(null);
-        localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
       }
-    } else {
-      setScheduledVisit(null);
-    }
 
-  }, [propertyId, router, toast]);
+      const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+      if (storedVisitsRaw) {
+        try {
+          const storedVisits = JSON.parse(storedVisitsRaw);
+          if (storedVisits[propertyId]) {
+            setScheduledVisit(storedVisits[propertyId]);
+          } else {
+            setScheduledVisit(null);
+          }
+        } catch (e) {
+          console.error('Error parsing scheduled visits from localStorage', e);
+          setScheduledVisit(null);
+          localStorage.removeItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+        }
+      } else {
+        setScheduledVisit(null);
+      }
+    };
+
+    fetchProperty();
+    loadVisit();
+
+  }, [propertyId, router, toast, currentUser]);
 
   const formatPriceDisplay = (price: number, currency: string) => {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: currency }).format(price);
@@ -132,7 +153,7 @@ export default function PropertyDetailsPage() {
     setIsVisitDialogOpen(true);
   };
 
-  const handleVisitSuccessfullyRequested = (details: { date: Date; time: string }) => {
+  const handleVisitSuccessfullyRequested = async (details: { date: Date; time: string }) => {
     if (!property) return;
 
     const displayTitle = `Dpto N° ${getUnitIdentifier(property.address.number)} ${property.condominioName} - ${property.bedrooms}D-${property.bathrooms}B`;
@@ -142,10 +163,26 @@ export default function PropertyDetailsPage() {
       propertyTitle: displayTitle,
     };
 
-    const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
-    const storedVisits = storedVisitsRaw ? JSON.parse(storedVisitsRaw) : {};
-    storedVisits[property.propertyId] = newVisit;
-    localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+    let saved = false;
+    if (currentUser) {
+      try {
+        await saveScheduledVisit(currentUser.uid, property.propertyId, {
+          propertyTitle: displayTitle,
+          date: Timestamp.fromDate(details.date),
+          time: details.time,
+        });
+        saved = true;
+      } catch (err) {
+        console.error('Failed to save scheduled visit to Firestore', err);
+      }
+    }
+
+    if (!saved) {
+      const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+      const storedVisits = storedVisitsRaw ? JSON.parse(storedVisitsRaw) : {};
+      storedVisits[property.propertyId] = newVisit;
+      localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+    }
 
     setScheduledVisit(newVisit);
     setIsVisitDialogOpen(false);
@@ -512,12 +549,23 @@ export default function PropertyDetailsPage() {
                       <p className="text-muted-foreground">Para: <span className="font-medium text-foreground">{scheduledVisit.propertyTitle}</span></p>
                       <p className="text-muted-foreground">Fecha: <span className="font-medium text-foreground">{format(new Date(scheduledVisit.date), "EEEE dd 'de' MMMM, yyyy", { locale: es })}</span></p>
                       <p className="text-muted-foreground">Hora: <span className="font-medium text-foreground">{scheduledVisit.time}</span></p>
-                      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => {
-                        const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
-                        if (storedVisitsRaw) {
-                            const storedVisits = JSON.parse(storedVisitsRaw);
-                            delete storedVisits[property.propertyId];
-                            localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+                      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={async () => {
+                        let removed = false;
+                        if (currentUser) {
+                          try {
+                            await deleteScheduledVisit(currentUser.uid, property.propertyId);
+                            removed = true;
+                          } catch (err) {
+                            console.error('Failed to delete scheduled visit from Firestore', err);
+                          }
+                        }
+                        if (!removed) {
+                          const storedVisitsRaw = localStorage.getItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY);
+                          if (storedVisitsRaw) {
+                              const storedVisits = JSON.parse(storedVisitsRaw);
+                              delete storedVisits[property.propertyId];
+                              localStorage.setItem(LOCAL_STORAGE_SCHEDULED_VISITS_KEY, JSON.stringify(storedVisits));
+                          }
                         }
                         setScheduledVisit(null);
                         toast({title: "Visita cancelada", description: "Puedes agendar una nueva visita si lo deseas."})
