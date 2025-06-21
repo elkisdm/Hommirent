@@ -97,7 +97,7 @@ export function ImageUpload({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
           {existingImageUrls.map((url, index) => (
             <div key={`existing-${index}`} className="relative group aspect-square">
-              <Image src={url} alt={`Imagen existente ${index + 1}`} layout="fill" objectFit="cover" className="rounded-md" />
+              <Image src={url} alt={`Imagen existente ${index + 1}`} fill style={{ objectFit: 'cover' }} className="rounded-md" />
               {onRemoveExistingImage && (
                 <Button
                   variant="destructive"
@@ -112,7 +112,7 @@ export function ImageUpload({
           ))}
           {previewUrls.map((url, index) => (
             <div key={`new-${index}`} className="relative group aspect-square">
-              <Image src={url} alt={`Nueva imagen ${index + 1}`} layout="fill" objectFit="cover" className="rounded-md" />
+              <Image src={url} alt={`Nueva imagen ${index + 1}`} fill style={{ objectFit: 'cover' }} className="rounded-md" />
               <Button
                 variant="destructive"
                 size="icon"
