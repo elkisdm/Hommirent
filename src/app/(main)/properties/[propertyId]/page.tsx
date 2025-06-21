@@ -42,7 +42,8 @@ interface ScheduledVisitInfo {
   propertyTitle: string;
 }
 
-const WHATSAPP_CONTACT_NUMBER = '+56993481594';
+const WHATSAPP_CONTACT_NUMBER =
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '';
 
 export default function PropertyDetailsPage() {
   const params = useParams();
