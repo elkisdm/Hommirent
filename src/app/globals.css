@@ -16,36 +16,35 @@ h1, h2, h3, h4, h5, h6 {
 
 @layer base {
   :root {
-    /* Dark Theme (Default) - Refined for serious and minimalist look */
-    --background: 220 40% 5%; /* Very Dark Blue/Almost Black: #050B0F */
-    --foreground: 210 40% 98%; /* Almost white for text */
-    --heading-foreground: 0 0% 100%; /* Pure white for headings */
+    /* Dark Theme (Default) */
+    --background: 220 12% 6%; /* #0b0d10 */
+    --foreground: 220 15% 95%; /* near white */
+    --heading-foreground: 0 0% 100%;
 
     /* Gradient for Dark Theme Body */
-    --gradient-start: 190 100% 14%; /* dark teal/blue: #003B46 */
-    --gradient-end: 220 50% 12%;   /* Dark Slate Blue-ish: #0F1C2D */
+    --gradient-start: 192 50% 10%;
+    --gradient-end: 215 20% 12%;
     --body-background-image: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
     --body-background-color: hsl(var(--background)); /* Fallback */
     
-    --card: 220 30% 12%;       /* Dark Grayish Blue for cards: #121A23 */
-    --card-foreground: 210 40% 95%; 
+    --card: 218 15% 12%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 220 30% 11%;     /* Slightly darker than card for popovers: #101820 */
-    --popover-foreground: 210 40% 96%;
+    --popover: 218 15% 14%;
+    --popover-foreground: 210 20% 96%;
 
-    /* PRD Primary: Teal (#0A7E8C) -> hsl(187, 87%, 27%) */
-    --primary: 187 87% 27%;
+    /* Primary accent */
+    --primary: 188 60% 45%;
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    /* Refined Secondary: Darker, desaturated teal */
-    --secondary: 187 60% 20%; /* #144D53 */
-    --secondary-foreground: 200 50% 90%; /* Very light cyan/white: #D9F2FA */
+    --secondary: 188 30% 30%;
+    --secondary-foreground: 200 50% 90%;
 
-    --muted: 220 15% 18%; /* Dark Gray: #252A31 */       
-    --muted-foreground: 210 40% 70%; /* Light Gray */
+    --muted: 220 10% 20%;
+    --muted-foreground: 210 15% 70%;
 
-    /* PRD Accent: Mustard Yellow (#D1AC00) -> hsl(50, 100%, 41%) */
-    --accent: 50 100% 41%;     
+    /* Accent color */
+    --accent: 42 96% 52%;
     --accent-foreground: 0 0% 10%; /* Dark text on mustard yellow for contrast */
     
     /* Kept from previous theme if needed for specific elements, but main accent is now yellow */
@@ -83,33 +82,32 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .light {
-    /* PRD Background (Light): Very Light Teal (#F0F8FA) -> hsl(195, 67%, 97%) */
-    --background: 195 67% 97%;
-    --foreground: 220 25% 20%; /* Dark Gray for text */
-    --heading-foreground: 220 30% 10%; /* Near Black for headings */
+    /* Light Theme */
+    --background: 210 40% 98%;
+    --foreground: 210 20% 20%;
+    --heading-foreground: 210 30% 15%;
 
     --body-background-image: none; /* Solid color for light theme body */
     --body-background-color: hsl(var(--background));
     
-    --card: 0 0% 100%; /* White cards */
-    --card-foreground: 220 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover-foreground: 210 20% 20%;
 
-    /* PRD Primary: Teal (#0A7E8C) -> hsl(187, 87%, 27%) */
-    --primary: 187 87% 27%; 
+    /* Primary accent */
+    --primary: 188 60% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Light, desaturated teal for secondary */
-    --secondary: 190 50% 90%; 
-    --secondary-foreground: 187 87% 27%; /* Dark Teal text */
+    --secondary: 188 30% 92%;
+    --secondary-foreground: 188 60% 45%;
 
-    --muted: 195 50% 93%;
-    --muted-foreground: 220 20% 45%;
+    --muted: 210 30% 94%;
+    --muted-foreground: 210 15% 40%;
 
-    /* PRD Accent: Mustard Yellow (#D1AC00) -> hsl(50, 100%, 41%) */
-    --accent: 50 100% 41%; 
+    /* Accent color */
+    --accent: 42 96% 52%;
     --accent-foreground: 0 0% 10%; /* Dark text on mustard yellow */
     
     --accent-purple: 255 70% 55%; 
@@ -120,8 +118,8 @@ h1, h2, h3, h4, h5, h6 {
     --destructive: 0 80% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 195 30% 85%; /* Light teal/gray border */
-    --input: 0 0% 98%; /* Very light gray input */
+    --border: 210 20% 88%;
+    --input: 0 0% 98%;
     --input-border-focus: hsl(var(--primary));
     --ring: hsl(var(--primary));
 
