@@ -24,8 +24,8 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <Image
               src={property.mainImageUrl || `https://placehold.co/600x375.png?text=${encodeURIComponent(property.title)}`}
               alt={property.title}
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: 'cover' }}
               data-ai-hint="apartment building modern"
               className="transition-transform duration-300 ease-in-out group-hover/link:scale-105"
             />
