@@ -1,10 +1,9 @@
 import { storage } from './config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid'; // For generating unique file names
 
 // Upload a single file
 export const uploadFile = async (file: File, path: string): Promise<string> => {
-  const fileId = uuidv4();
+  const fileId = crypto.randomUUID();
   const fileRef = ref(storage, `${path}/${fileId}-${file.name}`);
   await uploadBytes(fileRef, file);
   const downloadURL = await getDownloadURL(fileRef);

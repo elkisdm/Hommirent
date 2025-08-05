@@ -8,7 +8,6 @@ import { Spinner } from '@/components/ui/spinner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { LogOut, ShieldCheck, Settings } from 'lucide-react'; 
-import { MainNav } from './components/AdminMainNav'; // We'll create this simple nav
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { userProfile, loading, logout } = useAuth();
